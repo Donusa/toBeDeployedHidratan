@@ -1,0 +1,71 @@
+<div class="delivery-details-modal">
+  <h2 mat-dialog-title>Detalles del Reparto</h2>
+
+  <mat-dialog-content>
+    <div class="info-section">
+      <div class="info-group">
+        <h3>Información del Cliente</h3>
+        <div class="info-row">
+          <span class="label">Cliente:</span>
+          <span class="value">{{data.client.name}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Dirección:</span>
+          <span class="value">{{data.client.address}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Deuda Actual:</span>
+          <span class="value">{{data.client.debt | currency:'ARS':'symbol-narrow'}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Fecha de Reparto:</span>
+          <span class="value">{{formatDeliveryDateTime(data.deliveryDate)}}</span>
+        </div>
+      </div>
+
+      <div class="info-group" *ngIf="deliveryProducts.length > 0">
+        <h3>Productos a Entregar</h3>
+        <div class="products-grid">
+          <div class="product-item" *ngFor="let product of deliveryProducts">
+            <div class="product-header">
+              <span class="product-name">{{product.name}}</span>
+              <span class="product-stock">Stock:{{product.stock}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="deliveryProducts.length === 0" class="no-products">
+        <span>No hay productos para entregar</span>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button 
+            color="primary" 
+            (click)="onEdit()"
+            *ngIf="!isDelivered && isAdmin">
+      <mat-icon>edit</mat-icon>
+      Editar Reparto
+    </button>
+    
+    <button mat-button (click)="onClose()">Cerrar</button>
+    
+    <ng-container *ngIf="!isDelivered">
+      <button mat-button 
+              color="warn" 
+              (click)="onCancel()">
+        <mat-icon>cancel</mat-icon>
+        Cancelar Reparto
+      </button>
+      
+      <button mat-raised-button 
+              color="primary" 
+              (click)="showPaymentDialog()"
+              [disabled]="!isValidToComplete()">
+        <mat-icon>payment</mat-icon>
+        Marcar como Entregado
+      </button>
+    </ng-container>
+  </mat-dialog-actions>
+</div>

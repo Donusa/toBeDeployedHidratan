@@ -1,0 +1,55 @@
+<div class="user-details-modal">
+  <h2 mat-dialog-title>Detalles del Repartidor</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="personForm">
+      <div class="user-info-section">
+        <div class="info-group">
+          <h3>Información General</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="name">
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" [readonly]="!isEditing">
+            <mat-error *ngIf="personForm.get('email')?.errors?.['required']">
+              El email es requerido
+            </mat-error>
+            <mat-error *ngIf="personForm.get('email')?.errors?.['email']">
+              Ingrese un email válido
+            </mat-error>
+          </mat-form-field>
+
+          <div class="status-info">
+            <span class="label">Estado:</span>
+            <span class="value" [ngClass]="{
+              'status-activo': data.active,
+              'status-inactivo': !data.active
+            }">{{data.active ? 'Activo' : 'Inactivo'}}</span>
+          </div>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button color="warn" (click)="onToggleStatus()" *ngIf="isAdmin && data.active">
+      Dar de Baja
+    </button>
+    <button mat-button (click)="onCancel()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="onSave()" *ngIf="isEditing">
+      Guardar
+    </button>
+    <button mat-button color="primary" (click)="toggleEdit()" *ngIf="isAdmin">
+      {{ isEditing ? 'Cancelar Edición' : 'Editar' }}
+    </button>
+    <button mat-raised-button color="primary" (click)="onActivate()" *ngIf="isAdmin && !data.active">
+      Activar
+    </button>
+    <button mat-raised-button color="primary" (click)="downloadDeliveriesPDF()" *ngIf="isAdmin">
+      Descargar Repartos en PDF
+    </button>
+  </mat-dialog-actions>
+</div>

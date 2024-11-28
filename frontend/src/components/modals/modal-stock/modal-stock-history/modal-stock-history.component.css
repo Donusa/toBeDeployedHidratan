@@ -1,0 +1,57 @@
+.stock-details-modal {
+  padding: 1rem;
+}
+
+.product-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.info-group {
+  margin-bottom: 1rem;
+}
+
+.info-group h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.label {
+  font-weight: 500;
+  color: #6c757d;
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.value {
+  color: #2c3e50;
+}
+
+@media (max-width: 768px) {
+  .stock-history-modal {
+    padding: 1rem;
+  }
+
+  .history-table {
+    min-width: 500px;
+  }
+
+  mat-dialog-content {
+    overflow-x: auto;
+    padding: 0;
+  }
+
+  .mat-cell, .mat-header-cell {
+    padding: 8px;
+  }
+}

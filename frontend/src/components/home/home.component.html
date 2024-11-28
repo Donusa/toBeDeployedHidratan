@@ -1,0 +1,273 @@
+<div class="home-container">
+  <mat-sidenav-container>
+    <mat-sidenav #sidenav mode="over">
+      <mat-nav-list>
+        <div class="sidenav-header">
+          <div class="user-profile">
+            <mat-icon class="avatar-icon">account_circle</mat-icon>
+            <div class="user-info">
+              <h3>{{username}}</h3>
+              <span>{{userEmail}}</span>
+            </div>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+
+        <!-- Perfil -->
+        <a mat-list-item routerLink="/profile" (click)="sidenav.close()">
+          <mat-icon>person</mat-icon>
+          <span>Mi Perfil</span>
+        </a>
+        <mat-divider></mat-divider>
+
+        <!-- Accesos Rápidos -->
+        <a mat-list-item routerLink="/delivery-view" (click)="sidenav.close()">
+          <mat-icon>route</mat-icon>
+          <span>Vista de Reparto</span>
+        </a>
+        <a mat-list-item routerLink="/stock-management" *appRole="['ROLE_ADMIN']" (click)="sidenav.close()">
+          <mat-icon>inventory_2</mat-icon>
+          <span>Gestión de Stock</span>
+        </a>
+        <a mat-list-item routerLink="/delivery-management" *appRole="['ROLE_ADMIN']" (click)="sidenav.close()">
+          <mat-icon>groups</mat-icon>
+          <span>Gestión de Repartidores</span>
+        </a>
+        
+        <mat-divider></mat-divider>
+        
+        <!-- Logout -->
+        <a mat-list-item (click)="logout()" class="logout-item">
+          <mat-icon>exit_to_app</mat-icon>
+          <span>Cerrar Sesión</span>
+        </a>
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <!-- Toolbar mobile -->
+      <mat-toolbar class="mobile-toolbar" color="primary">
+        <button mat-icon-button (click)="sidenav.toggle()">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span>Hidratan</span>
+        <span class="toolbar-spacer"></span>
+      </mat-toolbar>
+
+      <!-- Contenido versión web -->
+      <div class="web-content">
+        <div class="dashboard-header">
+          <div class="header-content">
+            <h1>Hidratan</h1>
+            <button mat-icon-button [matMenuTriggerFor]="profileMenu" class="profile-button">
+              <mat-icon>account_circle</mat-icon>
+            </button>
+            <mat-menu #profileMenu="matMenu">
+              <div class="menu-header">
+                <mat-icon>account_circle</mat-icon>
+                <div class="menu-user-info">
+                  <span class="username">{{username}}</span>
+                  <span class="user-role">{{userEmail}}</span>
+                </div>
+              </div>
+              <mat-divider></mat-divider>
+              <button mat-menu-item routerLink="/profile">
+                <mat-icon>person</mat-icon>
+                <span>Mi Perfil</span>
+              </button>
+              <button mat-menu-item (click)="logout()">
+                <mat-icon>exit_to_app</mat-icon>
+                <span>Cerrar Sesión</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+
+        <div class="quick-stats">
+          <div class="stat-card">
+            <mat-icon>local_shipping</mat-icon>
+            <div class="stat-content">
+              <span class="stat-value">{{getTodayDeliveries()}}</span>
+              <span class="stat-label">
+                {{isAdmin ? 'Repartos Hoy' : 'Mis Repartos Hoy'}}
+              </span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <mat-icon>pending_actions</mat-icon>
+            <div class="stat-content">
+              <span class="stat-value">{{getPendingDeliveries()}}</span>
+              <span class="stat-label">Pendientes</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <mat-icon>check_circle</mat-icon>
+            <div class="stat-content">
+              <span class="stat-value">{{getCompletionRate()}}%</span>
+              <span class="stat-label">Completados</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-cards-container">
+          <div class="dashboard-cards-scroll" #cardsContainer>
+            <div class="dashboard-grid">
+              <mat-card class="dashboard-card">
+                <mat-card-header>
+                  <mat-icon>route</mat-icon>
+                  <mat-card-title>Vista de Reparto</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>Seguimiento en tiempo real de entregas y rutas activas</p>
+                  <ul class="feature-list">
+                    <li>Monitoreo de repartos en curso</li>
+                    <li>Estado de entregas en tiempo real</li>
+                    <li>Optimización de rutas</li>
+                  </ul>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-raised-button color="primary" routerLink="/delivery-view">
+                    <mat-icon>visibility</mat-icon>
+                    Ver Repartos
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+
+              <mat-card class="dashboard-card" *appRole="['ROLE_ADMIN']">
+                <mat-card-header>
+                  <mat-icon>inventory_2</mat-icon>
+                  <mat-card-title>Gestión de Stock</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>Control completo del inventario y gestión de productos</p>
+                  <ul class="feature-list">
+                    <li>Inventario en tiempo real</li>
+                    <li>Alertas de stock bajo</li>
+                    <li>Reportes de movimientos</li>
+                  </ul>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-raised-button color="accent" routerLink="/stock-management">
+                    <mat-icon>edit</mat-icon>
+                    Gestionar Stock
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+
+              <mat-card class="dashboard-card" *appRole="['ROLE_ADMIN']">
+                <mat-card-header>
+                  <mat-icon>groups</mat-icon>
+                  <mat-card-title>Gestión de Repartidores</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>Administración eficiente del equipo de distribución</p>
+                  <ul class="feature-list">
+                    <li>Asignación de rutas</li>
+                    <li>Control de horarios</li>
+                    <li>Rendimiento del equipo</li>
+                  </ul>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-raised-button color="warn" routerLink="/delivery-management">
+                    <mat-icon>manage_accounts</mat-icon>
+                    Gestionar Repartidores
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+
+              <mat-card class="dashboard-card" *appRole="['ROLE_ADMIN', 'ROLE_WORKER']">
+                <mat-card-header>
+                  <mat-icon>people</mat-icon>
+                  <mat-card-title>Gestión de Clientes</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>Control y seguimiento de clientes y sus inventarios</p>
+                  <ul class="feature-list">
+                    <li>Stock por cliente</li>
+                    <li>Control de deudas</li>
+                    <li>Programación de visitas</li>
+                  </ul>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-raised-button class="clients-button" routerLink="/client-management">
+                    <mat-icon>visibility</mat-icon>
+                    Ver Clientes
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenido mobile -->
+      <div class="mobile-content">
+        <!-- Stats section -->
+        <div class="mobile-stats">
+          <div class="stat-card">
+            <mat-icon>local_shipping</mat-icon>
+            <span class="stat-value">{{getTodayDeliveries()}}</span>
+          </div>
+          
+          <div class="stat-card">
+            <mat-icon>pending_actions</mat-icon>
+            <span class="stat-value">{{getPendingDeliveries()}}</span>
+          </div>
+          
+          <div class="stat-card">
+            <mat-icon>check_circle</mat-icon>
+            <span class="stat-value">{{getCompletionRate()}}%</span>
+          </div>
+        </div>
+
+        <div class="mobile-cards">
+          <!-- Vista de Reparto -->
+          <mat-card class="dashboard-card" routerLink="/delivery-view">
+            <mat-card-header>
+              <mat-icon>route</mat-icon>
+              <mat-card-title>Vista de Reparto</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Seguimiento en tiempo real de entregas y rutas activas</p>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Gestión de Stock -->
+          <mat-card class="dashboard-card" *appRole="['ROLE_ADMIN']" routerLink="/stock-management">
+            <mat-card-header>
+              <mat-icon>inventory_2</mat-icon>
+              <mat-card-title>Gestión de Stock</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Control completo del inventario y gestión de productos</p>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Gestión de Repartidores -->
+          <mat-card class="dashboard-card" *appRole="['ROLE_ADMIN']" routerLink="/delivery-management">
+            <mat-card-header>
+              <mat-icon>groups</mat-icon>
+              <mat-card-title>Gestión de Repartidores</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Administración eficiente del equipo de distribución</p>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Gestión de Clientes -->
+          <mat-card class="dashboard-card" *appRole="['ROLE_ADMIN', 'ROLE_WORKER']" routerLink="/client-management">
+            <mat-card-header>
+              <mat-icon>people</mat-icon>
+              <mat-card-title>Gestión de Clientes</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Control y seguimiento de clientes y sus inventarios</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

@@ -1,0 +1,32 @@
+.pending-deliveries-modal {
+  padding: 1rem;
+}
+
+.deliveries-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.delivery-item {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.info-icon {
+  font-size: 1.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  color: #464db3;
+}
+
+mat-list-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+mat-list-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+} 

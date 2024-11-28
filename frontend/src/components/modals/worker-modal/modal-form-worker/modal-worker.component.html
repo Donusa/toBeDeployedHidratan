@@ -1,0 +1,77 @@
+<div class="user-details-modal">
+  <h2 mat-dialog-title>Nuevo Repartidor</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="personForm">
+      <div class="info-section">
+        <div class="info-group">
+          <h3>Información Personal</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="name" required>
+            <mat-error *ngIf="personForm.get('name')?.errors?.['required']">
+              El nombre es requerido
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" required>
+            <mat-error *ngIf="personForm.get('email')?.errors?.['required']">
+              El email es requerido
+            </mat-error>
+            <mat-error *ngIf="personForm.get('email')?.errors?.['email']">
+              Ingrese un email válido
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="password-field">
+            <mat-label>Contraseña</mat-label>
+            <input matInput [type]="hidePassword ? 'password' : 'text'" 
+                   formControlName="pass" required>
+            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" 
+                    type="button">
+              <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-hint *ngIf="!currentValidation" class="desktop-hint">
+              La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial
+            </mat-hint>
+            <mat-hint *ngIf="currentValidation" class="mobile-hint">
+              <mat-icon class="validation-icon" [class.success]="passwordValidations[currentValidation!]">
+                {{passwordValidations[currentValidation!] ? 'check_circle' : 'error'}}
+              </mat-icon>
+              {{ getValidationMessage() }}
+            </mat-hint>
+            <mat-error *ngIf="personForm.get('pass')?.errors?.['required']">
+              La contraseña es requerida
+            </mat-error>
+            <mat-error *ngIf="personForm.get('pass')?.errors?.['pattern']">
+              La contraseña debe cumplir con todos los requisitos
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Rol</mat-label>
+            <mat-select formControlName="role" required>
+              <mat-option value="ROLE_DELIVERY">Repartidor</mat-option>
+              <mat-option value="ROLE_ADMIN">Administrador</mat-option>
+            </mat-select>
+            <mat-error *ngIf="personForm.get('role')?.errors?.['required']">
+              El rol es requerido
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onClose()">Cancelar</button>
+    <button mat-raised-button 
+            color="primary"
+            (click)="onSave()"
+            [disabled]="!personForm.valid">
+      Crear
+    </button>
+  </mat-dialog-actions>
+</div>

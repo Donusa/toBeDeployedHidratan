@@ -1,0 +1,37 @@
+<div class="modal-container">
+  <h2 mat-dialog-title>{{ data.id ? 'Editar' : 'Nuevo' }} Cliente</h2>
+
+  <form [formGroup]="clientForm">
+    <mat-dialog-content>
+      <div class="form-fields">
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="name" placeholder="Nombre del cliente">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Dirección</mat-label>
+          <input matInput formControlName="address" placeholder="Dirección del cliente">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Deuda</mat-label>
+          <input matInput type="number" formControlName="debt" min="0" inputmode="numeric">
+          <span matPrefix>$&nbsp;</span>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Frecuencia (días)</mat-label>
+          <input matInput type="text" formControlName="frecuency" min="1" pattern="^[0-9]*$" placeholder="Solo números" inputmode="numeric">
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button type="button" mat-button (click)="onCancel()">Cancelar</button>
+      <button type="submit" mat-raised-button color="primary" (click)="onSubmit()">
+        Guardar
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div> 

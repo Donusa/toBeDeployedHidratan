@@ -1,0 +1,289 @@
+/* Mobile-first styles */
+.profile-container {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.profile-banner {
+  background: linear-gradient(135deg, #464db3 0%, #6c72d4 100%);
+  padding: 32px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.avatar-container {
+  position: relative;
+}
+
+.avatar-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  color: white;
+}
+
+.change-photo-btn {
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  transform: scale(0.8);
+}
+
+.user-info {
+  color: white;
+}
+
+.user-info h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.user-role {
+  font-size: 14px;
+  opacity: 0.9;
+  display: block;
+  margin-top: 4px;
+}
+
+.user-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.user-status.active {
+  color: #4caf50;
+}
+
+.tab-icon {
+  margin-right: 0;
+  width: 50%;
+  text-align: center;
+}
+
+.tab-content {
+  padding: 16px;
+  text-align: center;
+  overflow: visible;
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.form-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+@media (min-width: 600px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-container {
+    padding: 16px;
+  }
+
+  .profile-banner {
+    padding: 20px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .avatar-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+  }
+
+  .user-info h3 {
+    font-size: 20px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .form-actions button {
+    width: 100%;
+    margin: 4px 0;
+  }
+
+  ::ng-deep .mat-mdc-tab-group {
+    margin: 0 -16px;
+    width: calc(100% + 32px);
+    overflow: hidden;
+  }
+
+  ::ng-deep .mat-mdc-tab-header {
+    margin: 0;
+    overflow: visible;
+  }
+
+  ::ng-deep .mat-mdc-tab-header-pagination {
+    display: none !important;
+  }
+
+  ::ng-deep .mat-mdc-tab-list {
+    transform: none !important;
+    transition: none !important;
+    width: 100%;
+  }
+
+  ::ng-deep .mat-mdc-tab-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  ::ng-deep .mat-mdc-tab {
+    flex: 1;
+    min-width: 0;
+    padding: 0 8px;
+  }
+
+  ::ng-deep .mdc-tab__content {
+    min-width: 0;
+  }
+
+  ::ng-deep .mdc-tab__text-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    overflow: visible;
+  }
+
+  .tab-icon {
+    margin-right: 4px;
+    min-width: 24px;
+  }
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    overflow-x: hidden;
+  }
+
+  ::ng-deep .mat-mdc-tab-body.mat-mdc-tab-body-active {
+    overflow-x: hidden;
+  }
+
+  .tab-content {
+    padding: 16px;
+    overflow-x: hidden;
+    text-align: center;
+  }
+
+  .tab-content h2 {
+    margin: 0;
+    font-size: 24px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .form-actions button {
+    width: 100%;
+    margin: 4px 0;
+  }
+
+  .tab-content {
+    text-align: center;
+  }
+
+  .mdc-tab__text-label {
+    justify-content: center;
+    display: flex;
+    align-items: center;
+  }
+
+  .tab-icon {
+    margin-right: 4px;
+  }
+}
+
+.mat-tab-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+  margin-bottom: 0rem;
+}
+
+.mat-mdc-form-field-hint {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.mat-mdc-form-field-error {
+  margin-top: 0.5rem;
+}
+
+.tab-text {
+  display: inline; /* Mostrar texto por defecto */
+}
+
+@media (max-width: 600px) {
+  .tab-text {
+    display: none; /* Ocultar texto en móviles */
+  }
+}
+
+.mat-error {
+  margin-top: 15rem;
+}
+
+
+
+.new-password-container,
+.confirm-password-container {
+  margin-bottom: -1.5rem; /* Espaciado entre los contenedores */
+}
+
+.current-password-container {
+  margin-bottom: 1rem; /* Espaciado inferior */
+}

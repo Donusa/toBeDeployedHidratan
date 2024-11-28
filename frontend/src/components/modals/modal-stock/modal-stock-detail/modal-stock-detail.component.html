@@ -1,0 +1,38 @@
+<div class="stock-details-modal">
+  <h2 mat-dialog-title>Detalles del Producto</h2>
+
+  <mat-dialog-content>
+    <div class="product-info-section">
+      <div class="info-group">
+        <h3>Información General</h3>
+        <div class="info-row">
+          <span class="label">ID:</span>
+          <span class="value">{{data.id}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Nombre:</span>
+          <span class="value">{{data.name}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Stock:</span>
+          <span class="value">{{data.stock}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Precio:</span>
+          <span class="value">{{data.price | currency:'ARS':'symbol-narrow'}}</span>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onClose()">Cerrar</button>
+    <button mat-raised-button 
+            color="primary" 
+            *ngIf="isAdmin"
+            (click)="onEdit()">
+      <mat-icon>edit</mat-icon>
+      Editar
+    </button>
+  </mat-dialog-actions>
+</div>

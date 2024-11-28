@@ -1,0 +1,418 @@
+/* Estilos base */
+.worker-management-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Estilos web */
+.web-view {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header h2 {
+  font-size: 1.75rem;
+  margin: 0;
+  color: #2c3e50;
+}
+
+/* Estadísticas versión web */
+.stats-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  flex: 1;
+  background: white;
+  padding: 1.25rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stat-text {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.stat-unit {
+  font-size: 1rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.stat-card mat-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #464db3;
+}
+
+/* Tabla de clientes */
+.clients-table-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.search-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+/* Media queries existentes para mobile */
+@media (min-width: 577px) {
+  .mobile-view {
+    display: none;
+  }
+  
+  .web-view {
+    display: block;
+  }
+}
+
+/* Mantener los estilos mobile existentes */
+@media (max-width: 576px) {
+  .mobile-view {
+    display: block;
+    margin-top: 56px;
+    min-height: calc(100vh - 56px);
+    background-color: #f8f9fa;
+  }
+
+  .mobile-view-section {
+    background: white;
+    padding: 1rem;
+  }
+
+  .mobile-view-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .mobile-view-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #2c3e50;
+    font-weight: 500;
+  }
+
+  .search-field {
+    margin: 0 0 1rem 0;
+  }
+
+  .search-field .mat-mdc-form-field-infix {
+    padding: 0.5rem 0;
+  }
+
+  .mobile-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .mobile-stats .stat-card {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .mobile-stats .stat-card mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #464db3;
+  }
+
+  .mobile-stats .stat-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+
+  .mobile-clients-list {
+    margin-top: 0.5rem;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+
+  .mobile-clients-list mat-list-item {
+    height: auto !important;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f1f1;
+  }
+
+  .mobile-clients-list ::ng-deep .mat-mdc-list-item-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+
+  .mobile-clients-list ::ng-deep .mat-mdc-list-item-line {
+    font-size: 0.85rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .info-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #464db3;
+  }
+
+
+  .clients-table-card {
+    padding: 0.75rem;
+  }
+
+  .mat-mdc-table {
+    font-size: 0.9rem;
+  }
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding: 8px;
+  }
+
+  .mat-mdc-header-cell {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .mat-mdc-cell {
+    font-size: 0.9rem;
+  }
+
+  /* Ajustar el ancho de las columnas en mobile */
+  .mat-column-name {
+    width: 30%;
+  }
+
+  .mat-column-address {
+    width: 45%;
+  }
+
+  .mat-column-debt {
+    width: 25%;
+  }
+
+  .mobile-fab-button {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: none;
+  }
+
+  @media (max-width: 576px) {
+    .mobile-fab-button {
+      display: block;
+    }
+
+    .actions {
+      display: none;
+    }
+  }
+}
+
+/* Ajustes responsive adicionales para web */
+@media (max-width: 1200px) {
+  .stats-container {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 992px) {
+  .web-view {
+    padding: 1rem;
+  }
+  
+  .header h2 {
+    font-size: 1.5rem;
+  }
+}
+
+.d-none {
+  display: none !important;
+}
+
+.mat-mdc-table {
+  width: 100%;
+}
+
+.mat-mdc-row:empty {
+  display: none;
+}
+
+.mat-mdc-header-row:empty {
+  display: none;
+}
+
+tr.mat-row:not(.mat-row[ng-reflect-ng-class*="d-none"]) {
+  height: auto;
+  min-height: 48px;
+}
+
+.mat-mdc-no-data-row td {
+  border-bottom: none;
+}
+
+.clients-table {
+  width: 100%;
+  background: transparent;
+}
+
+.client-row {
+  cursor: pointer;
+  height: 48px;
+}
+
+.client-row:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.mat-mdc-row {
+  height: 48px;
+}
+
+.mat-mdc-header-row {
+  height: 48px;
+  background: white;
+}
+
+.mat-mdc-no-data-row {
+  height: 48px;
+}
+
+.mat-mdc-no-data-row .mat-mdc-cell {
+  text-align: center;
+  border-bottom: none;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+/* Eliminar estos estilos que pueden estar causando conflictos */
+.d-none,
+.mat-mdc-row:empty,
+.mat-mdc-header-row:empty,
+tr.mat-row:not(.mat-row[ng-reflect-ng-class*="d-none"]) {
+  display: none;
+}
+
+.clients-table {
+  width: 100%;
+}
+
+.client-row {
+  cursor: pointer;
+}
+
+.client-row:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.mat-mdc-row {
+  min-height: 48px;
+}
+
+.mat-mdc-cell {
+  padding: 8px 16px;
+}
+
+.mat-mdc-no-data-row {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+.mat-mdc-no-data-row td {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.loading-spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+
+.personnel-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  /* Removing transition and hover effects */
+}
+
+/* Remove the hover effect styles */
+.personnel-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Remove hover effect for inactive cards as well */
+.personnel-card.inactive:hover {
+  transform: none;
+  box-shadow: none;
+}

@@ -1,0 +1,57 @@
+<div class="modal-container">
+  <h2 mat-dialog-title>Detalles del Cliente</h2>
+
+  <mat-dialog-content>
+    <div class="client-details">
+      <!-- Información básica -->
+      <div class="info-group">
+        <h3>Información General</h3>
+        <div class="info-row">
+          <span class="label">Nombre:</span>
+          <span class="value">{{data.name}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Dirección:</span>
+          <span class="value">{{data.address}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Deuda:</span>
+          <span class="value">{{data.debt | currency:'ARS':'symbol-narrow'}}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Frecuencia:</span>
+          <span class="value">Cada {{data.frecuency}} días</span>
+        </div>
+      </div>
+
+      <!-- Información de Productos -->
+      <div class="info-group">
+        <h3>Productos del Cliente</h3>
+        <div class="products-grid" *ngIf="clientProducts.length > 0">
+          <div class="product-item" *ngFor="let product of clientProducts">
+            <div class="product-header">
+              <span class="product-name">{{product.name}}</span>
+              <span class="product-stock" [ngClass]="{'stock-warning': product.stock < 5}">
+                {{product.stock}} unidades
+              </span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="clientProducts.length === 0" class="no-products">
+          <span>No hay productos asignados</span>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onClose()">Cerrar</button>
+    <button mat-raised-button 
+            color="primary" 
+            *ngIf="isAdmin"
+            (click)="onEdit()">
+      <mat-icon>edit</mat-icon>
+      Editar
+    </button>
+  </mat-dialog-actions>
+</div>

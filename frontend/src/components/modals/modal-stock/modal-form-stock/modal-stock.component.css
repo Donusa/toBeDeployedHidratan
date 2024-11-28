@@ -1,0 +1,56 @@
+.stock-modal {
+  padding: 20px;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-row mat-form-field {
+  flex: 1;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.mat-mdc-dialog-content {
+  max-height: 70vh;
+}
+
+mat-checkbox {
+  margin-top: 1rem;
+}
+
+:host ::ng-deep .mat-form-field-wrapper {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+h2.mat-dialog-title {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #464db3;
+}
+
+mat-dialog-actions {
+  margin-top: 20px;
+  padding: 8px 0;
+}
+
+mat-dialog-actions button {
+  min-width: 120px;
+}
+
+.price-container {
+  width: 100%;
+}

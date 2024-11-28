@@ -1,0 +1,148 @@
+<div class="delivery-view-container">
+  <div class="header">
+    <div class="header-left">
+      <button mat-icon-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h2>
+        {{isAdmin ? 'Vista de Todos los Repartos' : 'Mis Repartos de Hoy'}}
+      </h2>
+    </div>
+    <div class="actions" *appRole="['ROLE_ADMIN']">
+      <button mat-raised-button color="primary" (click)="openNewDeliveryForm()">
+        <mat-icon>add</mat-icon>
+        Nuevo Reparto
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-container">
+    <div class="stat-card">
+      <mat-icon>local_shipping</mat-icon>
+      <div class="stat-content">
+        <div class="stat-text">
+          <span class="stat-value">{{getTotalDeliveries()}}</span>
+          <span class="stat-unit">repartos</span>
+        </div>
+        <span class="stat-label">Total</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <mat-icon>pending_actions</mat-icon>
+      <div class="stat-content">
+        <div class="stat-text">
+          <span class="stat-value">{{getPendingDeliveries()}}</span>
+          <span class="stat-unit">pendientes</span>
+        </div>
+        <span class="stat-label">Por Entregar</span>
+      </div>
+    </div>
+  </div>
+
+  <mat-card class="deliveries-table-card">
+    <div class="filters-container">
+      <mat-form-field appearance="outline">
+        <mat-label>Estado</mat-label>
+        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="filterDeliveries()">
+          <mat-option value="all">Todos</mat-option>
+          <mat-option value="Pendiente">Pendiente</mat-option>
+          <mat-option value="Entregado">Entregado</mat-option>
+          <mat-option value="Cancelado">Cancelado</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar reparto</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por dirección, cliente..." #input>
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <!-- Client Name Column -->
+        <ng-container matColumnDef="clientName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Cliente </th>
+          <td mat-cell *matCellDef="let delivery"> {{delivery.client.name}} </td>
+        </ng-container>
+
+        <!-- Address Column -->
+        <ng-container matColumnDef="clientAdress">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Dirección </th>
+          <td mat-cell *matCellDef="let delivery"> {{delivery.client.address}} </td>
+        </ng-container>
+
+        <!-- Assigned To Column -->
+        <ng-container matColumnDef="delivererName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Repartidor </th>
+          <td mat-cell *matCellDef="let delivery"> {{delivery.delivererName}} </td>
+        </ng-container>
+
+        <!-- Debt Column -->
+        <ng-container matColumnDef="debt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Deuda </th>
+          <td mat-cell *matCellDef="let delivery">
+            <mat-icon [ngClass]="delivery.client.debt > 0 ? 'debt-warning' : 'debt-ok'">
+              {{delivery.client.debt > 0 ? 'warning' : 'check_circle'}}
+            </mat-icon>
+          </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> 
+            {{isMobile ? 'Fecha y Hora' : 'Fecha'}} 
+          </th>
+          <td mat-cell *matCellDef="let delivery">
+            {{ formatDeliveryDate(delivery.deliveryDate) }}
+            <ng-container *ngIf="isMobile">
+              {{ ' ' + formatDeliveryTime(delivery.deliveryDate) }}
+            </ng-container>
+          </td>
+        </ng-container>
+
+        <!-- Time Column -->
+        <ng-container matColumnDef="time">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Hora </th>
+          <td mat-cell *matCellDef="let delivery"> {{ formatDeliveryTime(delivery.deliveryDate) }} </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+          <td mat-cell *matCellDef="let delivery" [ngClass]="getStatusClass(delivery.status)">
+            <span [class]="getStatusClass(delivery.status)">
+              {{mapDeliveryStatus(delivery.status)}}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+            (click)="openDeliveryDetailDialog(row)"
+            class="delivery-row">
+        </tr>
+
+        <!-- Row shown when there is no matching data -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="7">No se encontraron repartos que coincidan con "{{input.value}}"</td>
+        </tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Seleccionar página de repartos"></mat-paginator>
+    </div>
+  </mat-card>
+
+  <div class="loading-overlay" *ngIf="isCreatingDelivery">
+    <mat-spinner diameter="50"></mat-spinner>
+    <span>Creando reparto...</span>
+  </div>
+
+  <!-- Botón flotante para mobile -->
+  <button mat-fab color="primary" 
+          class="mobile-fab-button" 
+          *appRole="['ROLE_ADMIN']" 
+          (click)="openNewDeliveryForm()">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

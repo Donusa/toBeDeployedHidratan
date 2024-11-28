@@ -1,0 +1,282 @@
+.delivery-management-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.content-layout {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* Panel de estadísticas */
+.stats-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.stat-card {
+  flex: 1;
+  background: #f8f9fa;
+  padding: 1.25rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stat-text {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.stat-unit {
+  font-size: 1rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.stat-card mat-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #464db3;
+}
+
+/* Panel principal de repartidores */
+.personnel-list-card {
+  flex: 1;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.personnel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.personnel-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.personnel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.personnel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.personnel-content {
+  padding: 1rem;
+}
+
+.personnel-content h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.personnel-email {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.personnel-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+/* Estados de los repartidores */
+.status-activo {
+  color: #2ecc71;
+}
+
+.status-enreparto {
+  color: #3498db;
+}
+
+.status-inactivo {
+  color: #dc3545;
+}
+
+.personnel-card.inactive {
+  opacity: 0.7;
+  background-color: #f8f9fa;
+}
+
+.personnel-card.inactive:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .content-layout {
+    gap: 1.5rem;
+  }
+  
+  .stats-container {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 992px) {
+  .content-layout {
+    flex-direction: column;
+  }
+  
+  .stats-container {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .delivery-management-container {
+    padding: 1rem;
+  }
+  
+  .personnel-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-container {
+    flex-direction: column;
+  }
+  
+  .stat-card {
+    width: 100%;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header h2 {
+  font-size: 1.75rem;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.header button[mat-icon-button] {
+  color: #464db3;
+}
+
+.header button[mat-icon-button]:hover {
+  background-color: rgba(70, 77, 179, 0.1);
+}
+
+.toggle-status-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+}
+
+.toggle-status-button:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.stat-card.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stat-card.clickable:hover {
+  background-color: rgba(70, 77, 179, 0.1);
+  transform: translateY(-3px);
+}
+
+.stat-card.clickable:active {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 576px) {
+  .mobile-fab-button {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: block;
+  }
+
+  .actions {
+    display: none;
+  }
+
+  .header {
+    padding: 1rem;
+  }
+
+  .header h2 {
+    font-size: 1.2rem;
+  }
+}

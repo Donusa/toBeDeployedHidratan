@@ -1,0 +1,86 @@
+<div class="delivery-management-container">
+  <div class="header">
+    <div class="header-left">
+      <button mat-icon-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h2>Gestión de Repartidores</h2>
+    </div>
+    <div class="actions" *ngIf="isAdmin">
+      <button mat-raised-button color="primary" (click)="openNewPersonnelDialog()">
+        <mat-icon>add</mat-icon>
+        Nuevo Repartidor
+      </button>
+    </div>
+  </div>
+
+  <mat-card class="personnel-list-card">
+    <div class="stats-container">
+      <div class="stat-card clickable" (click)="toggleActiveFilter()">
+        <mat-icon>people</mat-icon>
+        <div class="stat-content">
+          <div class="stat-text">
+            <span class="stat-value">{{getTotalDeliveryPersonnel()}}</span>
+            <span class="stat-unit">repartidores</span>
+          </div>
+          <span class="stat-label">Total Activos</span>
+        </div>
+      </div>
+      
+      <div class="stat-card clickable" (click)="showActiveDeliveries()">
+        <mat-icon>delivery_dining</mat-icon>
+        <div class="stat-content">
+          <div class="stat-text">
+            <span class="stat-value">{{getActiveDeliveries()}}</span>
+            <span class="stat-unit">repartos</span>
+          </div>
+          <span class="stat-label">En Curso</span>
+        </div>
+      </div>
+      
+      <div class="stat-card clickable" (click)="showCompletedDeliveries()">
+        <mat-icon>check_circle</mat-icon>
+        <div class="stat-content">
+          <div class="stat-text">
+            <span class="stat-value">{{getCompletedDeliveries()}}</span>
+            <span class="stat-unit">completados</span>
+          </div>
+          <span class="stat-label">Hoy</span>
+        </div>
+      </div>
+    </div>
+
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar repartidor</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Juan Pérez" #input>
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="personnel-grid">
+      <mat-card class="personnel-card" 
+                *ngFor="let person of deliveryPersonnel"
+                (click)="openPersonnelDetails(person)"
+                [ngClass]="{'inactive': !person.active}">
+        <div class="personnel-header">
+          <mat-icon [ngClass]="person.active ? 'status-activo' : 'status-inactivo'">
+            {{getStatusIcon(person.active)}}
+          </mat-icon>
+        </div>
+        
+        <div class="personnel-content">
+          <h3>{{person.name}}</h3>
+          <p class="personnel-email">{{person.email}}</p>
+          <p class="personnel-status">{{person.active ? 'Activo' : 'Inactivo'}}</p>
+        </div>
+      </mat-card>
+    </div>
+  </mat-card>
+
+  <!-- Botón flotante para mobile -->
+  <button mat-fab color="primary" 
+          class="mobile-fab-button" 
+          *ngIf="isAdmin" 
+          (click)="openNewPersonnelDialog()">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

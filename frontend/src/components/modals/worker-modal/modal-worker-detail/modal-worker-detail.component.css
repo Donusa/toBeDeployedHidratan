@@ -1,0 +1,59 @@
+.user-details-modal {
+  padding: 1rem;
+}
+
+.user-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.info-group {
+  margin-bottom: 1rem;
+}
+
+.info-group h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.label {
+  font-weight: 500;
+  color: #6c757d;
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.value {
+  color: #2c3e50;
+}
+
+.status-activo {
+  color: #2ecc71;
+}
+
+.status-inactivo {
+  color: #dc3545;
+}
+
+mat-dialog-actions {
+  padding: 1rem 0 0;
+  margin-bottom: 0;
+}
+
+mat-dialog-actions button {
+  margin-left: 8px;
+}
+
+button mat-icon {
+  margin-right: 8px;
+}

@@ -1,0 +1,29 @@
+<div class="pending-deliveries-modal">
+  <h2 mat-dialog-title>Repartos Pendientes de Hoy</h2>
+
+  <mat-dialog-content>
+    <div class="deliveries-list">
+      <mat-list>
+        <mat-list-item *ngFor="let delivery of data.deliveries" class="delivery-item">
+          <div matListItemTitle>{{delivery.client.name}}</div>
+          <div matListItemLine>
+            <mat-icon class="info-icon">location_on</mat-icon>
+            {{delivery.client.address}}
+          </div>
+          <div matListItemLine>
+            <mat-icon class="info-icon">schedule</mat-icon>
+            {{formatDeliveryDateTime(delivery.deliveryDate)}}
+          </div>
+          <div matListItemLine>
+            <mat-icon class="info-icon">person</mat-icon>
+            {{delivery.delivererName}}
+          </div>
+        </mat-list-item>
+      </mat-list>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onClose()">Cerrar</button>
+  </mat-dialog-actions>
+</div> 

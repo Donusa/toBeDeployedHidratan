@@ -1,0 +1,57 @@
+:host {
+  display: block;
+}
+
+.modal-container {
+  padding: 20px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.water-stock-section {
+  margin-top: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.water-product-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+mat-dialog-actions {
+  margin-top: 24px;
+  padding: 8px 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+h2 {
+  margin: 0;
+  color: #333;
+}
+
+h3 {
+  margin: 0;
+  color: #666;
+}

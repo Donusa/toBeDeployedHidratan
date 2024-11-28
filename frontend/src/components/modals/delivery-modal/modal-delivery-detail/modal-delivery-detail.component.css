@@ -1,0 +1,147 @@
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-checkbox {
+  margin-top: 1rem;
+}
+
+.mat-mdc-dialog-content {
+  max-height: 70vh;
+}
+
+.delivery-details-modal {
+  padding: 1rem;
+}
+
+.info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.info-group {
+  margin-bottom: 1rem;
+}
+
+.info-group h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.label {
+  font-weight: 500;
+  color: #6c757d;
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.value {
+  color: #2c3e50;
+}
+
+.water-stock-section {
+  margin: 1.5rem 0;
+}
+
+.stock-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.stock-item {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.product-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-name {
+  font-weight: 500;
+}
+
+.stock-value {
+  color: #2c3e50;
+}
+
+/* Ajustar estilos de los inputs numéricos */
+:host ::ng-deep .mat-form-field-wrapper {
+  padding-bottom: 0;
+  margin: 0;
+}
+
+:host ::ng-deep .mat-form-field-infix {
+  padding: 0.5em 0;
+}
+
+button[mat-icon-button] {
+  color: #666;
+}
+
+button[mat-icon-button]:disabled {
+  color: #ccc;
+}
+
+.stock-input {
+  width: 100px;
+  margin: -1rem 0;
+}
+
+.payment-input {
+  width: 120px;
+  margin: -1rem 0;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.product-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-name {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.product-stock {
+  font-size: 0.9rem;
+  color: #28a745;
+}

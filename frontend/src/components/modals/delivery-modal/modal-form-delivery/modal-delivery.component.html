@@ -1,0 +1,140 @@
+<div class="delivery-details-modal">
+  <h2 mat-dialog-title>Nuevo Reparto</h2>
+
+  <form [formGroup]="deliveryForm" (ngSubmit)="onSubmit()">
+      <mat-dialog-content>
+          <div class="info-section">
+              <div class="info-group">
+                  <h3>Información del Cliente</h3>
+                  <div class="form-row">
+                      <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Cliente</mat-label>
+                          <mat-select formControlName="clientName" required>
+                              <mat-option *ngIf="isLoading">
+                                  <mat-spinner diameter="20"></mat-spinner> Cargando clientes...
+                              </mat-option>
+                              <ng-container *ngIf="!isLoading">
+                                  <mat-option *ngFor="let client of clients" [value]="client.name">
+                                      {{client.name}} - {{client.address}}
+                                  </mat-option>
+                              </ng-container>
+                          </mat-select>
+                          <mat-error *ngIf="deliveryForm.get('clientName')?.errors?.['required']">
+                              El cliente es requerido
+                          </mat-error>
+                      </mat-form-field>
+                  </div>
+              </div>
+
+              <div class="info-group">
+                  <h3>Información del Reparto</h3>
+                  <div class="form-row">
+                      <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Repartidor Asignado</mat-label>
+                          <mat-select formControlName="assignedTo" required>
+                              <mat-option *ngIf="isLoading">
+                                  <mat-spinner diameter="20"></mat-spinner> Cargando repartidores...
+                              </mat-option>
+                              <ng-container *ngIf="!isLoading">
+                                  <mat-option *ngFor="let person of deliveryPersonnel" [value]="person.email">
+                                      {{person.name}}
+                                  </mat-option>
+                              </ng-container>
+                          </mat-select>
+                          <mat-error *ngIf="deliveryForm.get('assignedTo')?.errors?.['required']">
+                              El repartidor es requerido
+                          </mat-error>
+                      </mat-form-field>
+                  </div>
+
+                  <div class="form-row">
+                      <mat-form-field appearance="outline">
+                          <mat-label>Fecha de Reparto</mat-label>
+                          <input matInput [matDatepicker]="picker" 
+                                 formControlName="nextVisit" 
+                                 [min]="minDate"
+                                 [matDatepickerFilter]="dateFilter">
+                          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                          <mat-datepicker #picker></mat-datepicker>
+                          <mat-error *ngIf="deliveryForm.get('nextVisit')?.errors?.['required']">
+                              La fecha es requerida
+                          </mat-error>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline" class="time-input">
+                          <mat-label>Hora de Reparto</mat-label>
+                          <input matInput type="time" formControlName="deliveryTime" required>
+                          <mat-error *ngIf="deliveryForm.get('deliveryTime')?.errors?.['required']">
+                              La hora es requerida
+                          </mat-error>
+                          <mat-error *ngIf="deliveryForm.get('deliveryTime')?.errors?.['invalidTime']">
+                              Horario no válido
+                          </mat-error>
+                      </mat-form-field>
+                  </div>
+                  <div class="schedule-info">
+                      <span>Horarios disponibles: Lunes a Viernes 9:00 - 18:00, Sábados 9:00 - 13:00</span>
+                  </div>
+              </div>
+
+              <div class="info-group">
+                  <div class="section-header">
+                      <h3>Productos</h3>
+                      <button mat-mini-fab color="primary" type="button" (click)="addProduct()">
+                          <mat-icon>add</mat-icon>
+                      </button>
+                  </div>
+
+                  <div formArrayName="products" class="products-list">
+                      <div *ngFor="let product of getProductControls(); let i=index" 
+                           [formGroupName]="i" 
+                           class="product-item">
+                          <div class="product-form">
+                              <mat-form-field appearance="outline">
+                                  <mat-label>Producto</mat-label>
+                                  <mat-select formControlName="name" required>
+                                      <mat-option *ngIf="isLoading">
+                                          <mat-spinner diameter="20"></mat-spinner> Cargando...
+                                      </mat-option>
+                                      <ng-container *ngIf="!isLoading">
+                                          <mat-option *ngFor="let stockItem of stockProducts" [value]="stockItem.name">
+                                              <div class="product-option">
+                                                  <span class="product-name">{{stockItem.name}}</span>
+                                                  <small class="product-stock">Stock: {{stockItem.stock}}</small>
+                                              </div>
+                                          </mat-option>
+                                      </ng-container>
+                                  </mat-select>
+                                  <mat-error *ngIf="getProductControl(i).get('name')?.errors?.['required']">
+                                      El producto es requerido
+                                  </mat-error>
+                              </mat-form-field>
+
+                              <mat-form-field appearance="outline">
+                                  <mat-label>Cantidad</mat-label>
+                                  <input matInput type="number" formControlName="stock" min="0" inputmode="numeric">
+                                  <mat-error *ngIf="getProductControl(i).get('stock')?.errors?.['max']">
+                                      No hay suficiente stock
+                                  </mat-error>
+                              </mat-form-field>
+
+                              <button mat-icon-button color="warn" type="button" (click)="removeProduct(i)">
+                                  <mat-icon>delete</mat-icon>
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </mat-dialog-content>
+
+      <mat-dialog-actions align="end">
+          <button mat-button type="button" [disabled]="isLoading" (click)="onClose()">Cancelar</button>
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="!deliveryForm.valid || isLoading">
+              <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+              <span>{{ isLoading ? 'Creando...' : 'Crear Reparto' }}</span>
+          </button>
+      </mat-dialog-actions>
+  </form>
+</div>

@@ -1,0 +1,37 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "9000:9000"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/hidratan?createDatabaseIfNotExist=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=alsina1045
+      - SECRET_KEY=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
+      - MAIL_SENDER=lucadonofrio097@gmail.com
+      - MAIL_SENDER_PASSWORD=rbdz zpth tzed artm
+    depends_on:
+      db:
+          condition: service_healthy
+
+  db:
+    image: mysql:8.3.0
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: alsina1045
+      MYSQL_PASSWORD: alsina1045
+      MYSQL_DATABASE: hidratan
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:80"
+    restart: always
+    depends_on:
+      - backend
