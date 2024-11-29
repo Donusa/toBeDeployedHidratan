@@ -1,6 +1,6 @@
 export const environment = {
     production: false,
-    apiUrl: 'http://hidratan.com.ar/9000',
+    apiUrl: 'http://hidratan.com.ar:9000',
     endpoints: {
       auth: {
         base: '/api/v1/auth',
