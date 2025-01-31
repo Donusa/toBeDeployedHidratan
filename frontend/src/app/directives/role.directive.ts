@@ -1,41 +1,37 @@
 import { Directive, Input, TemplateRef, ViewContainerRef } from '@angular/core';
-import { AuthenticationService } from '../services/authenticationService.service';
+import { AuthenticationService } from '../services/authentication.service';
 
 @Directive({
-  selector: '[appRole]'
+  selector: '[appRole]',
+  standalone: true
 })
 export class RoleDirective {
   private currentUserRole: string = '';
+  private requiredRoles: string[] = [];
 
   constructor(
     private templateRef: TemplateRef<any>,
     private viewContainer: ViewContainerRef,
     private authService: AuthenticationService
   ) {
-      this.currentUserRole = localStorage.getItem('role') || '';
+    this.currentUserRole = this.authService.getCurrentRole();
   }
 
-  @Input() set appRole(allowedRoles: string[]) {
-    const hasAccess = this.checkRole(allowedRoles);
-    
-    if (hasAccess) {
+  @Input()
+  set appRole(roles: string | string[]) {
+    this.requiredRoles = Array.isArray(roles) ? roles : [roles];
+    this.updateView();
+  }
+
+  private updateView(): void {
+    this.viewContainer.clear();
+    if (this.checkRole()) {
       this.viewContainer.createEmbeddedView(this.templateRef);
-    } else {
-      this.viewContainer.clear();
     }
   }
 
-  private checkRole(allowedRoles: string[]): boolean {
-    if (!allowedRoles || allowedRoles.length === 0) return false;
-    
-    const currentRole = this.authService.getCurrentRole();
-    const roleMapping: { [key: string]: string } = {
-      'admin': 'ROLE_ADMIN',
-      'worker': 'ROLE_DELIVERY'
-    };
-
-    const mappedRole = roleMapping[currentRole.toLowerCase()] || currentRole;
-    return allowedRoles.includes(mappedRole);
+  private checkRole(): boolean {
+    if (!this.requiredRoles || this.requiredRoles.length === 0) return true;
+    return this.requiredRoles.includes(this.currentUserRole);
   }
-}
-   
+} 

@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>Detalles del Producto</h2>
+
+<mat-dialog-content>
+  <div class="details-container">
+    <div class="detail-section">
+      <div class="detail-header">
+        <mat-icon>inventory_2</mat-icon>
+        <h3>Información del Producto</h3>
+      </div>
+      <div class="detail-content">
+        <div class="detail-item">
+          <span class="label">Nombre:</span>
+          <span class="value">{{data.name}}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Precio:</span>
+          <span class="value">{{data.price | currency:'ARS':'symbol-narrow'}}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Retornable:</span>
+          <span class="value">
+            <mat-icon [class.returnable]="data.returnable">
+              {{data.returnable ? 'check_circle' : 'cancel'}}
+            </mat-icon>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">Cerrar</button>
+  <button mat-raised-button class="edit-button" (click)="onEdit()" *ngIf="isAdmin">
+    <mat-icon>edit</mat-icon>
+    Editar
+  </button>
+</mat-dialog-actions> 

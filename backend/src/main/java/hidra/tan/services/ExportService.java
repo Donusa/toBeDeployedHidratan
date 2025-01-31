@@ -40,17 +40,17 @@ public class ExportService {
             writer.write("ID,Client,Delivery Date,Status\n");
             List<Delivery> deliveries = deliveryRepository.findAll();
             for (Delivery delivery : deliveries) {
-                writer.write(delivery.getId() + "," + delivery.getClient().getName() + "," +
+                writer.write(delivery.getId() + "," + delivery.getClient().getAddress()+ "," +
                              delivery.getDeliveryDate() + "," + delivery.getStatus() + "\n");
             }
             
             // Export Clients
             writer.write("\nClients\n");
-            writer.write("ID,Name,Address,Debt\n");
+            writer.write("ID,Address,PhoneNumber,Debt\n");
             List<AppClient> clients = appClientRepository.findAll();
             for (AppClient client : clients) {
-                writer.write(client.getId() + "," + client.getName() + "," +
-                             client.getAddress() + "," + client.getDebt() + "\n");
+                writer.write(client.getId() + "," + client.getAddress() + "," +
+                             client.getPhoneNumber() + "," + client.getDebt() + "\n");
             }
             
             // Export Products
@@ -59,7 +59,7 @@ public class ExportService {
             List<Product> products = productRepository.findAll();
             for (Product product : products) {
                 writer.write(product.getId() + "," + product.getName() + "," +
-                             product.getPrice() + "," + product.getStock() + "\n");
+                             product.getPrice() + "\n");
             }
 
             // Export Deliverers

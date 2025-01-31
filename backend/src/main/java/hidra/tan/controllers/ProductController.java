@@ -16,11 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import hidra.tan.entities.ClientProduct;
 import hidra.tan.entities.Product;
 import hidra.tan.logging.Log4jImpl;
 import hidra.tan.requests.NewProductRequest;
-import hidra.tan.services.ClientProductService;
 import hidra.tan.services.ProductService;
 
 /**
@@ -36,9 +34,6 @@ public class ProductController {
 	@Autowired
 	private ProductService productService;
 
-	@Autowired
-	private ClientProductService clientProductService;
-
 	/**
 	 * Endpoint to list all products.
 	 *
@@ -50,19 +45,19 @@ public class ProductController {
 		return ResponseEntity.ok(productService.findAll());
 	}
 
+
 	/**
 	 * Endpoint to save a new product.
 	 *
 	 * @param name  the name of the product
 	 * @param price the price of the product
-	 * @param stock the stock quantity of the product
 	 * @return the saved product
 	 */
 	@PostMapping("/save")
 	public ResponseEntity<Product> save(@RequestParam String name, @RequestParam BigDecimal price,
-			@RequestParam int stock) {
+			 @RequestParam boolean returnable) {
 		logger.logInfo("ProductController.save");
-		return ResponseEntity.ok(productService.save(Product.builder().name(name).price(price).stock(stock).build()));
+		return ResponseEntity.ok(productService.save(Product.builder().name(name).price(price).returnable(returnable).build()));
 	}
 
 	/**
@@ -73,18 +68,7 @@ public class ProductController {
 	 * @param quantity
 	 * @return
 	 */
-	@PostMapping("/toClient")
-	public ResponseEntity<ClientProduct> addProductToClient(
-			@RequestBody NewProductRequest newProductRequest) {
-		logger.logInfo("ProductController.addProductToClient");
-		return ResponseEntity.ok(
-				clientProductService.addProductToClient(
-						newProductRequest.getClientId(),
-						newProductRequest.getProductId(),
-						newProductRequest.getQuantity()
-						)
-				);
-	}
+
 
 	/**
 	 * Endpoint to update an existing product.
@@ -92,15 +76,14 @@ public class ProductController {
 	 * @param id    the ID of the product to update
 	 * @param name  the updated name of the product
 	 * @param price the updated price of the product
-	 * @param stock the updated stock quantity of the product
 	 * @return the updated product
 	 */
 	@PutMapping("/update")
 	public ResponseEntity<Product> update(@RequestParam Long id, @RequestParam String name,
-			@RequestParam BigDecimal price, @RequestParam int stock) {
+										  @RequestParam BigDecimal price, @RequestParam boolean returnable) {
 		logger.logInfo("ProductController.update");
 		Product updatedProduct = productService
-				.update(Product.builder().id(id).name(name).price(price).stock(stock).build());
+				.update(Product.builder().id(id).name(name).price(price).returnable(returnable).build());
 		return ResponseEntity.ok(updatedProduct);
 	}
 

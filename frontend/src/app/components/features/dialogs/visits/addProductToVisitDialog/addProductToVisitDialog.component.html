@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>Agregar Producto</h2>
+
+<form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <div class="form-fields">
+      <mat-form-field appearance="outline">
+        <mat-label>Producto</mat-label>
+        <mat-select formControlName="productId">
+          <mat-option *ngFor="let stock of data.availableProducts" [value]="stock.product.id">
+            {{stock.product.name}} - Stock: {{stock.quantity}}
+            <span *ngIf="data.type === 'return'"> (Retornable)</span>
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="productForm.get('productId')?.hasError('required')">
+          Seleccione un producto
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Cantidad</mat-label>
+        <input matInput type="number" formControlName="quantity" min="1" [max]="getMaxQuantity()">
+        <mat-error *ngIf="productForm.get('quantity')?.hasError('required')">
+          La cantidad es requerida
+        </mat-error>
+        <mat-error *ngIf="productForm.get('quantity')?.hasError('max')">
+          La cantidad excede el stock disponible
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onClose()">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!productForm.valid">
+      Agregar
+    </button>
+  </mat-dialog-actions>
+</form> 

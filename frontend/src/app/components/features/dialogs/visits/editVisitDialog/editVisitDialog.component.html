@@ -1,0 +1,73 @@
+<h2 mat-dialog-title>Editar Visita</h2>
+
+<form [formGroup]="visitForm" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <div class="form-fields">
+      <mat-form-field appearance="outline">
+        <mat-label>Cliente</mat-label>
+        <input type="text"
+               matInput
+               [formControl]="clientSearchControl"
+               [matAutocomplete]="autoClient"
+               placeholder="Buscar cliente...">
+        <mat-autocomplete #autoClient="matAutocomplete" [displayWith]="displayClient">
+          <mat-option *ngFor="let client of filteredClients | async" [value]="client">
+            {{client.address}}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="clientSearchControl.hasError('invalidSelection')">
+          Seleccione un cliente válido de la lista
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Repartidor</mat-label>
+        <input type="text"
+               matInput
+               [formControl]="delivererSearchControl"
+               [matAutocomplete]="autoDeliverer"
+               placeholder="Buscar repartidor...">
+        <mat-autocomplete #autoDeliverer="matAutocomplete" [displayWith]="displayDeliverer">
+          <mat-option *ngFor="let deliverer of filteredDeliverers | async" [value]="deliverer">
+            {{deliverer.name}}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="delivererSearchControl.hasError('invalidSelection')">
+          Seleccione un repartidor válido de la lista
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="date" [matDatepickerFilter]="dateFilter">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="visitForm.get('date')?.hasError('required')">
+          La fecha es requerida
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Hora</mat-label>
+        <input matInput type="time" formControlName="time">
+        <mat-error *ngIf="visitForm.get('time')?.hasError('required')">
+          La hora es requerida
+        </mat-error>
+        <mat-error *ngIf="visitForm.get('time')?.hasError('invalidTime')">
+          Horario no válido. Lunes a Viernes: 9:00 - 16:00, Sábados: 9:00 - 13:00
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+    <button mat-raised-button 
+            color="primary" 
+            type="submit" 
+            [disabled]="!visitForm.valid || !clientSearchControl.valid || !delivererSearchControl.valid">
+      <mat-icon>save</mat-icon>
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</form> 

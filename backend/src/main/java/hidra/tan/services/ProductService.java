@@ -35,19 +35,19 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
-	public Product update(Product product) {
-		Optional<Product> existingProductOpt = productRepository.findById(product.getId());
-		logger.logInfo("ProductService.update");
+    public Product update(Product product) {
+        Optional<Product> existingProductOpt = productRepository.findById(product.getId());
+        logger.logInfo("ProductService.update");
         if (existingProductOpt.isPresent()) {
             Product existingProduct = existingProductOpt.get();
             existingProduct.setName(product.getName());
             existingProduct.setPrice(product.getPrice());
-            existingProduct.setStock(product.getStock());
+            existingProduct.setReturnable(product.isReturnable());
             logger.logInfo("Product updated: " + existingProduct.toString());
             return productRepository.save(existingProduct);
         } else {
-        	logger.logError("Product not found with id: " + product.getId());
+            logger.logError("Product not found with id: " + product.getId());
             throw new RuntimeException("Product not found with id: " + product.getId());
         }
-	}
+    }
 }

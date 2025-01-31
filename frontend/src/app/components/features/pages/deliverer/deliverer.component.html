@@ -1,0 +1,103 @@
+<div class="worker-management-container">
+  <div class="web-view">
+    <div class="header">
+      <div class="header-left">
+        <button mat-icon-button (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h2>Gestión de Repartidores</h2>
+      </div>
+      <button mat-raised-button color="primary" (click)="openNewDelivererDialog()" *ngIf="isAdmin" class="desktop-only">
+        <mat-icon>add</mat-icon>
+        Nuevo Repartidor
+      </button>
+    </div>
+
+    <div class="stats-container">
+      <div class="stat-card">
+        <mat-icon>people</mat-icon>
+        <div class="stat-content">
+          <span class="stat-label">Total Repartidores</span>
+          <div class="stat-text">
+            <span class="stat-value">{{getTotalDeliverers()}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <mat-icon>check_circle</mat-icon>
+        <div class="stat-content">
+          <span class="stat-label">Repartidores Activos</span>
+          <div class="stat-text">
+            <span class="stat-value">{{getActiveDeliverers()}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <mat-card>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar repartidor</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Nombre, email..." #input>
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <div class="loading-shade" *ngIf="isLoading">
+          <mat-spinner></mat-spinner>
+        </div>
+
+        <div class="deliverers-grid" *ngIf="!isLoading">
+          <mat-card class="deliverer-card" *ngFor="let deliverer of dataSource.filteredData">
+            <mat-card-header>
+              <div mat-card-avatar class="deliverer-avatar">
+                <span>{{deliverer.role === 'ROLE_ADMIN' ? 'A' : 'R'}}</span>
+              </div>
+              <mat-card-title>{{deliverer.name}}</mat-card-title>
+              <mat-card-subtitle>{{deliverer.email}}</mat-card-subtitle>
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="card-menu-button">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="openDelivererDetailsDialog(deliverer)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>Ver detalles</span>
+                </button>
+                <button mat-menu-item (click)="openEditDelivererDialog(deliverer)" *ngIf="isAdmin">
+                  <mat-icon>edit</mat-icon>
+                  <span>Editar</span>
+                </button>
+                <button mat-menu-item (click)="openAddProductDialog(deliverer)" *ngIf="isAdmin && deliverer.active">
+                  <mat-icon>add</mat-icon>
+                  <span>Agregar Productos</span>
+                </button>
+                <button mat-menu-item (click)="downloadDelivererReport(deliverer)" *ngIf="deliverer.active">
+                  <mat-icon>download</mat-icon>
+                  <span>Descargar Entregas</span>
+                </button>
+              </mat-menu>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="status-container">
+                <span [class]="'status-badge ' + (deliverer.active ? 'active' : 'inactive')">
+                  {{deliverer.active ? 'Activo' : 'Inactivo'}}
+                </span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div class="no-data-message" *ngIf="!isLoading && dataSource.filteredData.length === 0">
+          <mat-icon>search_off</mat-icon>
+          <p>No se encontraron repartidores</p>
+        </div>
+
+        <mat-paginator [pageSizeOptions]="[12, 24, 48]" aria-label="Seleccionar página"></mat-paginator>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <button mat-fab color="primary" class="mobile-fab-button" (click)="openNewDelivererDialog()" *ngIf="isAdmin">
+    <mat-icon>add</mat-icon>
+  </button>
+</div> 

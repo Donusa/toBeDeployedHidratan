@@ -1,35 +1,25 @@
 package hidra.tan.entities;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import hidra.tan.enums.Roles;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import jakarta.persistence.Column;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
+@ToString(exclude = {"deliveryManStock", "emptyProducts", "deliveries"})
 public class AppUser implements UserDetails{
 
 	private static final long serialVersionUID = 1L;
@@ -41,6 +31,12 @@ public class AppUser implements UserDetails{
 	private String email;
 	private String pass;
 	private String name;
+	@Builder.Default
+	private BigDecimal dailyEarnings = BigDecimal.ZERO;
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "deliveryMan", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<DeliveryManStock> deliveryManStock;
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "appUser", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<EmptyProduct> emptyProducts;
 	@Builder.Default
 	private Boolean active = true;
 	@Enumerated(EnumType.STRING)
@@ -78,4 +74,5 @@ public class AppUser implements UserDetails{
 	public String getPassword() {
 		return this.pass;
 	}
+
 }

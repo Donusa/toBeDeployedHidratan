@@ -38,11 +38,7 @@ public class Delivery {
     @JsonBackReference("user-delivery")
     private AppUser deliveryMan;
     private String status;
-    
-    @OneToMany(mappedBy = "delivery", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<DeliveryProduct> deliveryProducts;
-    
+
     @Override
 	public String toString() {
 		return "Delivery";

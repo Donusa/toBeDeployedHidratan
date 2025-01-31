@@ -16,7 +16,5 @@ public class DeliveryDto {
     private String deliveryDate;
     private String status;
     private String deliveryManEmail;
-    private String clientName;
     private String address;
-    private List<DeliveryProductDto> deliveryProducts; 
 }

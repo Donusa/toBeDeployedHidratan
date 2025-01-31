@@ -8,20 +8,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import hidra.tan.entities.*;
+import hidra.tan.repositories.*;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import hidra.tan.entities.AppClient;
-import hidra.tan.entities.AppUser;
-import hidra.tan.entities.ClientProduct;
-import hidra.tan.entities.Delivery;
-import hidra.tan.entities.DeliveryProduct;
-import hidra.tan.entities.Product;
-import hidra.tan.repositories.DeliveryRepository;
-import hidra.tan.requests.ProductAdditionRequest;
+
 import hidra.tan.responses.DeliveryDto;
-import hidra.tan.responses.DeliveryProductDto;
 import hidra.tan.responses.DeliveryViewResponse;
 import jakarta.transaction.Transactional;
 
@@ -37,7 +32,16 @@ public class DeliveryService {
 	private AppClientService clientService;
 	@Autowired
 	private ProductService productService;
-	
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private DailyTotalHistoryRepository dailyTotalHistoryRepository;
+	@Autowired
+	private DeliveryManStockRepository deliveryManStockRepository;
+	@Autowired
+	private ClientStockRepository clientStockRepository;
+	@Autowired
+	private AppClientService appClientService;
 	@Transactional
 	public List<Delivery> findAll() {
 		List<Delivery> deliveries = deliveryRepository.findAll();
@@ -57,8 +61,7 @@ public class DeliveryService {
 				.collect(Collectors.toList());
 	}
 
-	public Delivery createDelivery(Long clientId, String deliveryDate, String assignedDeliverer, String status,
-			List<ProductAdditionRequest> products) {
+	public Delivery createDelivery(Long clientId, String deliveryDate, String assignedDeliverer, String status) {
 
 		AppUser deliveryMan = appUserService.findByEmail(assignedDeliverer);
 		AppClient client = clientService.findById(clientId).get();
@@ -66,49 +69,17 @@ public class DeliveryService {
 		final Delivery delivery = Delivery.builder().client(client).deliveryDate(deliveryDate).deliveryMan(deliveryMan)
 				.status(status).build();
 
-		List<DeliveryProduct> deliveryProducts = products.stream().map(product -> DeliveryProduct.builder()
-				.delivery(delivery).product(product.getProduct()).quantity(product.getQuantity()).build())
-				.collect(Collectors.toList());
-
-		List<ClientProduct> productsInClient = products.stream().map(product -> ClientProduct.builder().client(client)
-				.product(product.getProduct()).quantity(product.getQuantity()).build()).collect(Collectors.toList());
-		if (delivery.getDeliveryProducts() == null) {
-			delivery.setDeliveryProducts(new ArrayList<>());
-		}
-		delivery.getDeliveryProducts().clear();
-		delivery.getDeliveryProducts().addAll(deliveryProducts);
-
-		if (client.getClientProducts() == null) {
-			client.setClientProducts(new ArrayList<>());
-		}
-		client.getClientProducts().clear();
-		client.getClientProducts().addAll(productsInClient);
 		clientService.save(client);
-
-		discountStock(products);
-		
 		return save(delivery);
 	}
 
-	private void discountStock(List<ProductAdditionRequest> products) {
-		for (ProductAdditionRequest product : products) {
-			Product p = productService.findById(product.getProduct().getId());
-			int quantity = product.getQuantity();
-			p.setStock(p.getStock() - quantity);
-			productService.save(p);
-		}
-	}
 
 	@Transactional
 	public DeliveryDto mapToDTO(Delivery delivery) {
-		Hibernate.initialize(delivery.getClient().getClientProducts());
-		return DeliveryDto.builder().id(delivery.getId()).clientName(delivery.getClient().getName())
+		Hibernate.initialize(delivery.getClient());
+		return DeliveryDto.builder().id(delivery.getId())
 				.deliveryDate(delivery.getDeliveryDate()).deliveryManEmail(delivery.getDeliveryMan().getEmail())
 				.status(delivery.getStatus())
-				.deliveryProducts(delivery
-						.getDeliveryProducts().stream().map(dp -> DeliveryProductDto.builder()
-								.productName(dp.getProduct().getName()).quantity(dp.getQuantity()).build())
-						.collect(Collectors.toList()))
 				.address(delivery.getClient().getAddress())
 				.build();
 	}
@@ -126,12 +97,12 @@ public class DeliveryService {
 	public List<DeliveryDto> findToday() {
 		String today = getTodayAsString().split("T")[0];
 		List<DeliveryDto> deliveries = deliveryRepository.findAll().stream()
-			.filter(delivery -> {
-				String deliveryDate = delivery.getDeliveryDate().split("T")[0];
-				return deliveryDate.equals(today);
-			})
-			.map(this::mapToDTO)
-			.collect(Collectors.toList());
+				.filter(delivery -> {
+					String deliveryDate = delivery.getDeliveryDate().split("T")[0];
+					return deliveryDate.equals(today);
+				})
+				.map(this::mapToDTO)
+				.collect(Collectors.toList());
 		return deliveries;
 	}
 
@@ -141,38 +112,114 @@ public class DeliveryService {
 		return formatter.format(date);
 	}
 
-	public void completeDelivery(Long id, BigDecimal payment) {
-		Delivery delivery = deliveryRepository.findById(id).get();
-		delivery.setStatus("COMPLETED");
-		AppClient client = delivery.getClient();
-		BigDecimal newDebt = client.getDebt().subtract(payment);
-		client.setDebt(newDebt);
-		clientService.save(client);
-		save(delivery);
-	}
 
-	public void cancelDelivery(Long id) {
-		Delivery delivery = deliveryRepository.findById(id).get();
-		delivery.setStatus("CANCELED");
-		List<DeliveryProduct> products = delivery.getDeliveryProducts();
-		for (DeliveryProduct product : products) {
-			Product p = product.getProduct();
-			p.setStock(p.getStock() + product.getQuantity());
-			productService.save(p);
-		}
-		save(delivery);
-	}
 
 	public List<DeliveryDto> findTodayByDeliverer(String email) {
 		String today = getTodayAsString().split("T")[0];
 		return deliveryRepository.findAll().stream()
-			.filter(delivery -> {
-				String deliveryDate = delivery.getDeliveryDate().split("T")[0];
-				return deliveryDate.equals(today) && 
-					   delivery.getDeliveryMan().getEmail().equals(email);
-			})
-			.map(this::mapToDTO)
-			.collect(Collectors.toList());
+				.filter(delivery -> {
+					String deliveryDate = delivery.getDeliveryDate().split("T")[0];
+					return deliveryDate.equals(today) &&
+							delivery.getDeliveryMan().getEmail().equals(email);
+				})
+				.map(this::mapToDTO)
+				.collect(Collectors.toList());
 	}
 
+	@Transactional
+	public void transferProductToClient(String deliveryManEmail, Long clientId, Long productId, int quantity) {
+		AppUser deliveryMan = appUserService.findByEmail(deliveryManEmail);
+		DeliveryManStock deliveryManStock = deliveryMan.getDeliveryManStock().stream()
+				.filter(stock -> stock.getProduct().getId().equals(productId))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Product not found in deliveryMan stock"));
+
+		AppClient client = appClientService.findById(clientId).orElseThrow(() -> new IllegalArgumentException("Client not found"));
+
+		Optional<ClientStock> clientStockOpt = client.getClientStock().stream()
+				.filter(stock -> stock.getProduct().getId().equals(productId))
+				.findFirst();
+
+		if (deliveryManStock.getQuantity() >= quantity) {
+			deliveryManStock.setQuantity(deliveryManStock.getQuantity() - quantity);
+
+			if (deliveryManStock.getProduct().isReturnable()) {
+				ClientStock clientStock;
+				if (clientStockOpt.isPresent()) {
+					clientStock = clientStockOpt.get();
+					clientStock.setQuantity(clientStock.getQuantity() + quantity);
+				} else {
+					clientStock = new ClientStock();
+					clientStock.setClient(client);
+					clientStock.setProduct(deliveryManStock.getProduct());
+					clientStock.setQuantity(quantity);
+					client.getClientStock().add(clientStock);
+				}
+				clientStockRepository.save(clientStock);
+			}
+
+			deliveryManStockRepository.save(deliveryManStock);
+		} else {
+			throw new IllegalArgumentException("Insufficient product quantity in deliveryMan stock");
+		}
+	}
+
+	public void returnProductToDeliveryMan(Long clientId, String deliveryManEmail, Long productId, int quantity) {
+		AppClient client = appClientService.findById(clientId).orElseThrow(() -> new IllegalArgumentException("Client not found"));
+		AppUser deliveryMan = appUserService.findByEmail(deliveryManEmail);
+
+		ClientStock clientStock = client.getClientStock().stream()
+				.filter(stock -> stock.getProduct().getId().equals(productId))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Product not found in client stock"));
+
+		if (clientStock.getQuantity() < quantity) {
+			throw new IllegalArgumentException("Insufficient product quantity in client stock");
+		}
+
+		clientStock.setQuantity(clientStock.getQuantity() - quantity);
+		if (clientStock.getQuantity() == 0) {
+			client.getClientStock().remove(clientStock);
+			clientStockRepository.delete(clientStock);
+		} else {
+			clientStockRepository.save(clientStock);
+		}
+
+		EmptyProduct emptyProduct = EmptyProduct.builder()
+				.appUser(deliveryMan)
+				.product(clientStock.getProduct())
+				.quantity(quantity)
+				.build();
+		deliveryMan.getEmptyProducts().add(emptyProduct);
+	}
+
+	public void payDebt(Long clientId, BigDecimal amount) {
+		AppClient client = appClientService.findById(clientId)
+				.orElseThrow(() -> new IllegalArgumentException("Client not found"));
+		BigDecimal newDebt = client.getDebt().subtract(amount);
+		client.setDebt(newDebt);
+		appClientService.save(client);
+	}
+
+	public Delivery completeDelivery(Long deliveryId) {
+		Delivery delivery = deliveryRepository.findById(deliveryId)
+				.orElseThrow(() -> new IllegalArgumentException("Delivery not found"));
+		delivery.setStatus("COMPLETED");
+		return deliveryRepository.save(delivery);
+	}
+
+	@Scheduled(cron = "0 0 0 * * *")
+	public void resetDailyEarnings() {
+		List<AppUser> users = userRepository.findAll();
+		for (AppUser user : users) {
+			DailyTotalHistory history = new DailyTotalHistory();
+			history.setDate(new Date());
+			history.setDeliveryMan(user);
+			history.setTotal(user.getDailyEarnings());
+			dailyTotalHistoryRepository.save(history);
+
+			user.setDailyEarnings(BigDecimal.ZERO);
+			userRepository.save(user);
+		}
+	}
 }

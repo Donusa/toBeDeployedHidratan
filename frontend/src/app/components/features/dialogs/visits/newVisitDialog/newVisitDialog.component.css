@@ -1,0 +1,73 @@
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-dialog-content {
+  min-width: 400px;
+}
+
+.mat-mdc-option {
+  line-height: 1.2;
+  min-height: 3rem;
+  padding: 8px 16px;
+}
+
+@media (max-width: 576px) {
+  mat-dialog-content {
+    min-width: unset;
+  }
+}
+
+.schedule-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  border: 1px solid #90caf9;
+}
+
+.schedule-info mat-icon {
+  color: #1976d2;
+}
+
+.schedule-text {
+  flex: 1;
+}
+
+.schedule-text strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #1976d2;
+}
+
+.schedule-text ul {
+  margin: 0;
+  padding-left: 16px;
+  list-style-type: none;
+}
+
+.schedule-text li {
+  position: relative;
+  padding-left: 8px;
+  margin-bottom: 4px;
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.schedule-text li::before {
+  content: "•";
+  position: absolute;
+  left: -8px;
+  color: #1976d2;
+} 

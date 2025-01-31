@@ -3,6 +3,10 @@ package hidra.tan.services;
 import java.util.List;
 import java.util.Optional;
 
+import hidra.tan.entities.DeliveryManStock;
+import hidra.tan.entities.Product;
+import hidra.tan.repositories.DeliveryManStockRepository;
+import hidra.tan.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +18,10 @@ public class AppUserService {
 
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private ProductRepository productRepository;
+	@Autowired
+	private DeliveryManStockRepository deliveryManStockRepository;
 
 	public List<AppUser> findAll() {
 		return userRepository.findAll();
@@ -33,18 +41,18 @@ public class AppUserService {
 		return userRepository.save(appUser);
 	}
 
-	public AppUser update(String email, AppUser appUser) {
+
+	public AppUser updateUserDetailsByEmail(String email, AppUser updatedUser) {
 		AppUser existingUser = userRepository.findByEmail(email)
 				.orElseThrow(() -> new RuntimeException("User not found with email: " + email));
-		existingUser.setEmail(appUser.getEmail());
-		existingUser.setRole(appUser.getRole());
-		existingUser.setActive(appUser.getActive());
-		existingUser.setName(appUser.getName());
-		if(appUser.getDeliveries() != null) {			
-			existingUser.getDeliveries().clear();
-			existingUser.getDeliveries().addAll(appUser.getDeliveries());
+		existingUser.setEmail(updatedUser.getEmail());
+		existingUser.setRole(updatedUser.getRole());
+		existingUser.setActive(updatedUser.getActive());
+		existingUser.setName(updatedUser.getName());
+		if (updatedUser.getDeliveryManStock() != null) {
+			existingUser.getDeliveryManStock().clear();
+			existingUser.getDeliveryManStock().addAll(updatedUser.getDeliveryManStock());
 		}
-		existingUser.setPass(appUser.getPass());
 
 		return userRepository.save(existingUser);
 	}
@@ -62,4 +70,35 @@ public class AppUserService {
 		}
 		return null;
 	}
+
+	public boolean addStockToDeliveryMan(Long productId, int quantity, String delivererEmail) {
+		Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+		AppUser deliverer = userRepository.findByEmail(delivererEmail)
+				.orElseThrow(() -> new RuntimeException("User not found with email: " + delivererEmail));
+
+		Optional<DeliveryManStock> existingStock = deliverer.getDeliveryManStock().stream()
+				.filter(stock -> stock.getProduct().getId().equals(productId))
+				.findFirst();
+
+		if (existingStock.isPresent()) {
+
+			existingStock.get().setQuantity(existingStock.get().getQuantity() + quantity);
+		} else {
+
+			DeliveryManStock stock = new DeliveryManStock();
+			stock.setDeliveryMan(deliverer);
+			stock.setProduct(product);
+			stock.setQuantity(quantity);
+			deliverer.getDeliveryManStock().add(stock);
+		}
+
+		userRepository.save(deliverer);
+
+		return true;
+	}
+
 }
+
+

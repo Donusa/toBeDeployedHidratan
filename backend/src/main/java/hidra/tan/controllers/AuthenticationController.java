@@ -67,7 +67,7 @@ public class AuthenticationController {
 	 * @return the authentication response containing the JWT token
 	 */
 	@PostMapping("/authenticate")
-	public ResponseEntity<AuthenticationResponse> register(@RequestBody AuthenticationRequest request) {
+	public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
 		logger.logInfo("Authenticate endpoint hit with email: " + request.getEmail());
 		AuthenticationResponse response = authService.authenticate(request);
 		logger.logInfo("User authenticated successfully: " + request.getEmail());

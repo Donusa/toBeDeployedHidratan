@@ -1,42 +1,28 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { Observable } from 'rxjs';
-import { AuthenticationService } from './authenticationService.service';
+import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthenticationService } from './authentication.service';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthGuardService {
   constructor(
-    private authService: AuthenticationService, 
-    private router: Router
+    private router: Router,
+    private authService: AuthenticationService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    const token = localStorage.getItem('access_token');
-    
-    if (!token) {
+  canActivate(): boolean {
+    if (isPlatformBrowser(this.platformId)) {
+      const token = sessionStorage.getItem('access_token');
+      if (token) {
+        return true;
+      }
+
       this.router.navigate(['/login']);
       return false;
     }
-
-    const requiredRoles = route.data['roles'] as Array<string>;
-    if (requiredRoles) {
-      const userRole = this.authService.getCurrentRole();
-      if (!this.checkRole(userRole, requiredRoles)) {
-        this.router.navigate(['/home']);
-        return false;
-      }
-    }
-
     return true;
   }
-
-  private checkRole(userRole: string, allowedRoles: string[]): boolean {
-    if (!allowedRoles || allowedRoles.length === 0) return true;
-    return allowedRoles.includes(userRole);
-  }
-}
+} 

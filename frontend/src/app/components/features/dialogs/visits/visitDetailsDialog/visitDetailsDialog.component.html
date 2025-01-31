@@ -1,0 +1,183 @@
+<h2 mat-dialog-title>Detalles de la Visita</h2>
+
+<mat-dialog-content>
+  <div class="details-container">
+    <div class="detail-section">
+      <div class="detail-header">
+        <mat-icon>local_shipping</mat-icon>
+        <h3>Información de la Visita</h3>
+      </div>
+      <div class="detail-content">
+        <div class="detail-item">
+          <span class="label">Cliente:</span>
+          <span class="value">{{data.client.address}}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Repartidor:</span>
+          <span class="value">{{data.delivererName}}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Fecha:</span>
+          <span class="value">{{formatDateOnly(data.deliveryDate)}}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Hora:</span>
+          <span class="value">{{formatTimeOnly(data.deliveryDate)}}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Estado:</span>
+          <span class="value">
+            <span [class]="'status-badge ' + getStatusClass(data.status)">
+              {{getStatusLabel(data.status)}}
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-header">
+        <mat-icon>payments</mat-icon>
+        <h3>Pago</h3>
+        <button mat-raised-button color="accent" 
+                (click)="addPayment()" 
+                [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+          <mat-icon>add</mat-icon>
+          Registrar Pago
+        </button>
+      </div>
+
+      <div class="detail-content">
+        <div class="payment-info">
+          <div class="detail-item">
+            <span class="label">Deuda actual:</span>
+            <span class="value debt-amount">{{data.client.debt | currency:'ARS':'symbol-narrow'}}</span>
+          </div>
+          <div class="detail-item" *ngIf="currentPayment > 0">
+            <span class="label">Pago a registrar:</span>
+            <span class="value payment-amount">{{currentPayment | currency:'ARS':'symbol-narrow'}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-header">
+        <mat-icon>inventory_add</mat-icon>
+        <h3>Productos a Entregar</h3>
+        <button mat-raised-button color="primary" 
+                (click)="addProduct('delivery')" 
+                [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+          <mat-icon>add</mat-icon>
+          Agregar Producto
+        </button>
+      </div>
+
+      <div class="detail-content">
+        <table mat-table [dataSource]="deliveryProducts" class="products-table">
+          <ng-container matColumnDef="product">
+            <th mat-header-cell *matHeaderCellDef>Producto</th>
+            <td mat-cell *matCellDef="let item">{{item.product.name}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+            <td mat-cell *matCellDef="let item">{{item.quantity}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let item; let i = index">
+              <button mat-icon-button color="warn" 
+                      (click)="removeProduct(i, 'delivery')" 
+                      [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedProductColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedProductColumns;"></tr>
+        </table>
+
+        <div *ngIf="deliveryProducts.data.length === 0" class="no-products-message">
+          <mat-icon>inventory_2</mat-icon>
+          <p>No hay productos para entregar</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-header">
+        <mat-icon>inventory_2</mat-icon>
+        <h3>Productos a Retirar</h3>
+        <button mat-raised-button color="accent" 
+                (click)="addProduct('return')" 
+                [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+          <mat-icon>add</mat-icon>
+          Agregar Retorno
+        </button>
+      </div>
+
+      <div class="detail-content">
+        <table mat-table [dataSource]="returnProducts" class="products-table">
+          <ng-container matColumnDef="product">
+            <th mat-header-cell *matHeaderCellDef>Producto</th>
+            <td mat-cell *matCellDef="let item">{{item.product.name}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+            <td mat-cell *matCellDef="let item">{{item.quantity}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let item; let i = index">
+              <button mat-icon-button color="warn" 
+                      (click)="removeProduct(i, 'return')" 
+                      [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedProductColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedProductColumns;"></tr>
+        </table>
+
+        <div *ngIf="returnProducts.data.length === 0" class="no-products-message">
+          <mat-icon>inventory_2</mat-icon>
+          <p>No hay productos para retirar</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="onClose()">
+    <mat-icon>close</mat-icon>
+    Cerrar
+  </button>
+  <div class="action-buttons">
+    <button mat-raised-button color="warn" 
+            (click)="onCancel()" 
+            *ngIf="data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
+      <mat-icon>cancel</mat-icon>
+      Cancelar Visita
+    </button>
+    <button mat-raised-button color="accent" 
+            (click)="onEdit()" 
+            *ngIf="isAdmin && data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
+      <mat-icon>edit</mat-icon>
+      Editar
+    </button>
+    <button mat-raised-button color="primary" 
+            (click)="onSave()" 
+            *ngIf="data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
+      <mat-icon>save</mat-icon>
+      Finalizar Visita
+    </button>
+  </div>
+</mat-dialog-actions> 
