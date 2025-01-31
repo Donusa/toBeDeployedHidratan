@@ -45,7 +45,7 @@ import { EditClientDialogComponent } from '../../dialogs/clients/editClientDialo
   providers: [DatePipe]
 })
 export class ClientComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['address', 'debt', 'phoneNumber', 'nextVisit', 'frecuency'];
+  displayedColumns: string[] = ['address', 'debt', 'phoneNumber', 'frecuency'];
   dataSource: MatTableDataSource<Client>;
   isLoading = true;
   isMobile = window.innerWidth <= 576;
@@ -121,7 +121,7 @@ export class ClientComponent implements OnInit, AfterViewInit {
     this.isMobile = window.innerWidth <= 576;
     this.displayedColumns = this.isMobile 
       ? ['address', 'debt', 'phoneNumber']
-      : ['address', 'debt', 'phoneNumber', 'nextVisit', 'frecuency'];
+      : ['address', 'debt', 'phoneNumber', 'frecuency'];
   }
 
   applyFilter(event: Event) {
@@ -193,4 +193,5 @@ export class ClientComponent implements OnInit, AfterViewInit {
     if (!date) return '-';
     return this.datePipe.transform(date, 'HH:mm') || '-';
   }
+
 }

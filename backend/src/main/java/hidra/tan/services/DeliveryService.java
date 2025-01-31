@@ -214,6 +214,7 @@ public class DeliveryService {
 		return deliveryRepository.save(delivery);
 	}
 
+
 	@Scheduled(cron = "0 0 0 * * *")
 	public void resetDailyEarnings() {
 		List<AppUser> users = userRepository.findAll();

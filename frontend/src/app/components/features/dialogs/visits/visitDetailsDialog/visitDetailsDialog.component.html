@@ -37,32 +37,6 @@
 
     <div class="detail-section">
       <div class="detail-header">
-        <mat-icon>payments</mat-icon>
-        <h3>Pago</h3>
-        <button mat-raised-button color="accent" 
-                (click)="addPayment()" 
-                [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
-          <mat-icon>add</mat-icon>
-          Registrar Pago
-        </button>
-      </div>
-
-      <div class="detail-content">
-        <div class="payment-info">
-          <div class="detail-item">
-            <span class="label">Deuda actual:</span>
-            <span class="value debt-amount">{{data.client.debt | currency:'ARS':'symbol-narrow'}}</span>
-          </div>
-          <div class="detail-item" *ngIf="currentPayment > 0">
-            <span class="label">Pago a registrar:</span>
-            <span class="value payment-amount">{{currentPayment | currency:'ARS':'symbol-narrow'}}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="detail-section">
-      <div class="detail-header">
         <mat-icon>inventory_add</mat-icon>
         <h3>Productos a Entregar</h3>
         <button mat-raised-button color="primary" 
@@ -149,6 +123,32 @@
         <div *ngIf="returnProducts.data.length === 0" class="no-products-message">
           <mat-icon>inventory_2</mat-icon>
           <p>No hay productos para retirar</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-header">
+        <mat-icon>payments</mat-icon>
+        <h3>Pago</h3>
+        <button mat-raised-button color="accent" 
+                (click)="addPayment()" 
+                [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+          <mat-icon>add</mat-icon>
+          Registrar Pago
+        </button>
+      </div>
+
+      <div class="detail-content">
+        <div class="payment-info">
+          <div class="detail-item">
+            <span class="label">Deuda actual:</span>
+            <span class="value debt-amount">{{data.client.debt | currency:'ARS':'symbol-narrow'}}</span>
+          </div>
+          <div class="detail-item" *ngIf="currentPayment > 0">
+            <span class="label">Pago a registrar:</span>
+            <span class="value payment-amount">{{currentPayment | currency:'ARS':'symbol-narrow'}}</span>
+          </div>
         </div>
       </div>
     </div>
