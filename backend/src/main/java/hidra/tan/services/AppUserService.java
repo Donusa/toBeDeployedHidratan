@@ -3,14 +3,14 @@ package hidra.tan.services;
 import java.util.List;
 import java.util.Optional;
 
-import hidra.tan.entities.DeliveryManStock;
-import hidra.tan.entities.Product;
-import hidra.tan.repositories.DeliveryManStockRepository;
-import hidra.tan.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import hidra.tan.entities.AppUser;
+import hidra.tan.entities.Delivery;
+import hidra.tan.entities.DeliveryManStock;
+import hidra.tan.entities.Product;
+import hidra.tan.repositories.ProductRepository;
 import hidra.tan.repositories.UserRepository;
 
 @Service
@@ -21,8 +21,8 @@ public class AppUserService {
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
-	private DeliveryManStockRepository deliveryManStockRepository;
-
+	private DeliveryService deliveryService;
+	
 	public List<AppUser> findAll() {
 		return userRepository.findAll();
 	}
@@ -97,6 +97,25 @@ public class AppUserService {
 		userRepository.save(deliverer);
 
 		return true;
+	}
+
+	public AppUser enable(String email) {
+		AppUser existingUserOpt = findByEmail(email);
+		if (existingUserOpt != null) {
+			AppUser existingUser = existingUserOpt;
+			existingUser.setActive(true);
+			return userRepository.save(existingUser);
+		}
+		return null;
+	}
+
+	public List<Delivery> getMatchingDeliveries(String email) {
+		var list = deliveryService.findAll().stream().filter(
+					d -> 
+					d.getDeliveryMan().getEmail().equals(email)
+				)
+				.toList();
+		return list;
 	}
 
 }

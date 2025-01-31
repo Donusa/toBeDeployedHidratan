@@ -2,20 +2,28 @@
 package hidra.tan.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-
-import hidra.tan.entities.AppClient;
-import hidra.tan.entities.ClientStock;
-import hidra.tan.entities.DeliveryManStock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import hidra.tan.services.AppClientService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import hidra.tan.entities.AppClient;
 import hidra.tan.entities.AppUser;
+import hidra.tan.entities.ClientStock;
+import hidra.tan.entities.DeliveryManStock;
 import hidra.tan.responses.AppUserResponse;
+import hidra.tan.services.AppClientService;
 import hidra.tan.services.AppUserService;
+import hidra.tan.services.DailyTotalHistoryService;
 
 /**
  * Controller for managing application users.
@@ -31,6 +39,8 @@ public class ManagmentController {
     @Autowired
     private AppClientService appClientService;
 
+    @Autowired
+    private DailyTotalHistoryService dailyTotalHistoryService;
 
     /**
      * Endpoint to list all users.
@@ -124,4 +134,26 @@ public class ManagmentController {
         return ResponseEntity.ok("User disabled successfully");
     }
 
+    @PostMapping("/users/enable")
+	public ResponseEntity<?> enableUser(@RequestBody String email) {
+		AppUser enabledUser = appUserService.enable(email);
+		if (enabledUser == null) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok("User enabled successfully");
+	}
+    
+    @GetMapping("/histories")
+	public ResponseEntity<?> getHistory() {
+    	var list = dailyTotalHistoryService.getDailyTotalHistories();
+    	var dto = list.stream()
+                .map(h -> dailyTotalHistoryService.mapToDto(h))
+                .collect(Collectors.toList());
+		return ResponseEntity.ok(dto);
+	}
+    
+    @GetMapping("/getMatchingDeliveries")
+	public ResponseEntity<?> getMatchingDeliveries(@RequestParam String email) {
+		return ResponseEntity.ok(appUserService.getMatchingDeliveries(email));
+	}
 }

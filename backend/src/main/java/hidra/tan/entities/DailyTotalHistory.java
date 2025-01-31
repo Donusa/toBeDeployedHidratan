@@ -1,13 +1,20 @@
 package hidra.tan.entities;
 
-import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.util.Date;
 
 @Entity
 @Data
@@ -27,5 +34,15 @@ public class DailyTotalHistory {
 
     private BigDecimal total;
 
+    @OneToMany(mappedBy = "dailyTotalHistory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DailyProductHistory> dailyProductHistories;
+    
+    @OneToMany(mappedBy = "dailyTotalHistory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DailyEmptyProductHistory> dailyEmptyProductHistories;
+    
+    @Override
+	public String toString() {
+		return "";
+	}
 
 }

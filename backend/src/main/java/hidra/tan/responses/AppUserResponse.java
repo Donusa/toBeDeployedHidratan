@@ -1,12 +1,11 @@
 package hidra.tan.responses;
 
+import java.util.List;
+
 import hidra.tan.entities.AppUser;
 import hidra.tan.entities.DeliveryManStock;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @Builder

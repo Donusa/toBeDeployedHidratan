@@ -2,20 +2,28 @@ package hidra.tan.services;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import hidra.tan.entities.*;
-import hidra.tan.repositories.*;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-
+import hidra.tan.entities.AppClient;
+import hidra.tan.entities.AppUser;
+import hidra.tan.entities.ClientStock;
+import hidra.tan.entities.DailyTotalHistory;
+import hidra.tan.entities.Delivery;
+import hidra.tan.entities.DeliveryManStock;
+import hidra.tan.entities.EmptyProduct;
+import hidra.tan.repositories.ClientStockRepository;
+import hidra.tan.repositories.DailyTotalHistoryRepository;
+import hidra.tan.repositories.DeliveryManStockRepository;
+import hidra.tan.repositories.DeliveryRepository;
+import hidra.tan.repositories.UserRepository;
 import hidra.tan.responses.DeliveryDto;
 import hidra.tan.responses.DeliveryViewResponse;
 import jakarta.transaction.Transactional;
@@ -30,8 +38,6 @@ public class DeliveryService {
 	private AppUserService appUserService;
 	@Autowired
 	private AppClientService clientService;
-	@Autowired
-	private ProductService productService;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
