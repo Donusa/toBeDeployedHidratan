@@ -181,6 +181,7 @@ public class DeliveryController {
 		}).orElse(ResponseEntity.notFound().build());
 	}
 
+
 	@PostMapping("/pay")
 	public ResponseEntity<String> payDebt(@RequestParam Long clientId, @RequestParam BigDecimal payment) {
 		deliveryService.payDebt(clientId, payment);

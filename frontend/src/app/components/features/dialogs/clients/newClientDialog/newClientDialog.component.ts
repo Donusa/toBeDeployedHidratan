@@ -30,7 +30,7 @@ export class NewClientDialogComponent {
   ) {
     this.clientForm = this.fb.group({
       address: ['', Validators.required],
-      phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^(?:(?:00)?549?)?0?(?:11|[2368]\d)(?:(?=\d{0,2}15)\d{2})??\d{8}$/)]],
       frecuency: [0, [Validators.required, Validators.min(1)]],
       debt: [0, [Validators.required, Validators.min(0)]]
     });

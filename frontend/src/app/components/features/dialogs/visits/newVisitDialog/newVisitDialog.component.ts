@@ -281,19 +281,26 @@ export class NewVisitDialogComponent implements OnInit {
     if (!time) return null;
 
     const [hours, minutes] = time.split(':').map(Number);
+    const now = new Date();
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+
+    if (hours < currentHours || (hours === currentHours && minutes < currentMinutes)) {
+        return { invalidTime: true };
+    }
+
     const day = new Date().getDay();
-    
+
     if (day === 6) {
-      if (hours < 9 || (hours === 13 && minutes > 0) || hours > 13) {
-        return { invalidTime: true };
-      }
+        if (hours < 9 || (hours === 13 && minutes > 0) || hours > 13) {
+            return { invalidTime: true };
+        }
+    } else {
+        if (hours < 9 || (hours === 16 && minutes > 0) || hours > 16) {
+            return { invalidTime: true };
+        }
     }
-    else {
-      if (hours < 9 || (hours === 16 && minutes > 0) || hours > 16) {
-        return { invalidTime: true };
-      }
-    }
-    
+
     return null;
   }
 } 
