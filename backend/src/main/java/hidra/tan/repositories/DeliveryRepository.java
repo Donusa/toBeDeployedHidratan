@@ -5,8 +5,6 @@ import org.springframework.stereotype.Repository;
 
 import hidra.tan.entities.Delivery;
 
-import java.util.List;
-
 @Repository
 public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
 	

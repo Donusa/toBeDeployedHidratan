@@ -24,6 +24,7 @@ import hidra.tan.responses.AppUserResponse;
 import hidra.tan.services.AppClientService;
 import hidra.tan.services.AppUserService;
 import hidra.tan.services.DailyTotalHistoryService;
+import hidra.tan.services.DeliveryService;
 
 /**
  * Controller for managing application users.
@@ -42,6 +43,9 @@ public class ManagmentController {
     @Autowired
     private DailyTotalHistoryService dailyTotalHistoryService;
 
+    @Autowired
+    private DeliveryService deliveryService;
+    
     /**
      * Endpoint to list all users.
      *
@@ -154,6 +158,6 @@ public class ManagmentController {
     
     @GetMapping("/getMatchingDeliveries")
 	public ResponseEntity<?> getMatchingDeliveries(@RequestParam String email) {
-		return ResponseEntity.ok(appUserService.getMatchingDeliveries(email));
+		return ResponseEntity.ok(deliveryService.getMatchingDeliveries(email));
 	}
 }

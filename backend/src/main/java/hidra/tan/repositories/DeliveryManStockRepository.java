@@ -4,8 +4,11 @@ import hidra.tan.entities.AppUser;
 import hidra.tan.entities.DeliveryManStock;
 import hidra.tan.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface DeliveryManStockRepository extends JpaRepository<DeliveryManStock, Long> {
-    DeliveryManStock findByDeliveryManAndProduct(AppUser deliveryMan, Product product);
+    
+	DeliveryManStock findByDeliveryManAndProduct(AppUser deliveryMan, Product product);
 
 }

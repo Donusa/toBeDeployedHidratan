@@ -224,9 +224,20 @@ public class DeliveryService {
 			history.setDeliveryMan(user);
 			history.setTotal(user.getDailyEarnings());
 			dailyTotalHistoryRepository.save(history);
-
+			user.setEmptyProducts(List.of());
+			user.setDeliveryManStock(List.of());
 			user.setDailyEarnings(BigDecimal.ZERO);
 			userRepository.save(user);
 		}
+	}
+	
+
+	public List<Delivery> getMatchingDeliveries(String email) {
+		var list = deliveryRepository.findAll().stream().filter(
+					d -> 
+					d.getDeliveryMan().getEmail().equals(email)
+				)
+				.toList();
+		return list;
 	}
 }
