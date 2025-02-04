@@ -2,9 +2,7 @@ package hidra.tan.services;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
-import hidra.tan.logging.Log4jImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +12,9 @@ import hidra.tan.entities.Product;
 import hidra.tan.repositories.ProductRepository;
 import hidra.tan.repositories.UserRepository;
 
-import javax.swing.text.html.Option;
-
 @Service
 public class AppUserService {
 
-
-	@Autowired
-	private Log4jImpl logger;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired

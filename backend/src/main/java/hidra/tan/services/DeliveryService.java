@@ -199,10 +199,9 @@ public class DeliveryService {
 		deliveryMan.getEmptyProducts().add(emptyProduct);
 	}
 
-	public void payDebt(Long clientId, BigDecimal amount) {
+	public void payDebt(Long clientId, BigDecimal newDebt) {
 		AppClient client = appClientService.findById(clientId)
 				.orElseThrow(() -> new IllegalArgumentException("Client not found"));
-		BigDecimal newDebt = client.getDebt().subtract(amount);
 		client.setDebt(newDebt);
 		appClientService.save(client);
 	}

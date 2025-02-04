@@ -183,8 +183,8 @@ public class DeliveryController {
 
 
 	@PostMapping("/pay")
-	public ResponseEntity<String> payDebt(@RequestParam Long clientId, @RequestParam BigDecimal payment) {
-		deliveryService.payDebt(clientId, payment);
+	public ResponseEntity<String> payDebt(@RequestParam Long clientId, @RequestParam BigDecimal newDebt) {
+		deliveryService.payDebt(clientId, newDebt);
 		return ResponseEntity.ok("Payment processed successfully");
 	}
 }

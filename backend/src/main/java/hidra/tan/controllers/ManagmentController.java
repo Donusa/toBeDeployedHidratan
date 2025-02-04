@@ -4,7 +4,6 @@ package hidra.tan.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import hidra.tan.logging.Log4jImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
