@@ -2,11 +2,16 @@ package hidra.tan.services;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import hidra.tan.logging.Log4jImpl;
+import hidra.tan.responses.HistoryResponse;
+import hidra.tan.utils.MailUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,10 +33,17 @@ import hidra.tan.responses.DeliveryDto;
 import hidra.tan.responses.DeliveryViewResponse;
 import jakarta.transaction.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 public class DeliveryService {
 
+	@Autowired
+	private MailUtils mailUtils;
+	@Autowired
+	private DailyTotalHistoryService dailyTotalHistoryService;
+	@Autowired
+	private Log4jImpl logger;
 	@Autowired
 	private DeliveryRepository deliveryRepository;
 	@Autowired
@@ -214,20 +226,33 @@ public class DeliveryService {
 	}
 
 
-	@Scheduled(cron = "0 0 0 * * *")
+	@Scheduled(cron = "0 */1 * * * *")
 	public void resetDailyEarnings() {
+		List<HistoryResponse> historyResponses = new ArrayList<>();
 		List<AppUser> users = userRepository.findAll();
 		for (AppUser user : users) {
 			DailyTotalHistory history = new DailyTotalHistory();
 			history.setDate(new Date());
+			logger.logInfo(new Date().toString());
+
 			history.setDeliveryMan(user);
+			logger.logInfo(user.getEmail());
+
 			history.setTotal(user.getDailyEarnings());
-			dailyTotalHistoryRepository.save(history);
-			user.setEmptyProducts(List.of());
-			user.setDeliveryManStock(List.of());
+			logger.logInfo(user.getDailyEarnings().toString());
+
+			history.setDailyProductHistories(dailyTotalHistoryService.mapToProductHistory(user.getDeliveryManStock()));
+			history.setDailyEmptyProductHistories(dailyTotalHistoryService.mapToEmptyProductHistory(user.getEmptyProducts()));
+
+			historyResponses.add(dailyTotalHistoryService.mapToDto(history));
+
+
+			user.setEmptyProducts(new ArrayList<>());
+			user.setDeliveryManStock(new ArrayList<>());
 			user.setDailyEarnings(BigDecimal.ZERO);
 			userRepository.save(user);
 		}
+		mailUtils.sendTotalHistory(historyResponses);
 	}
 	
 

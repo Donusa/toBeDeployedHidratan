@@ -33,4 +33,5 @@ public class DailyProductHistory {
 	public String toString() {
 		return "";
 	}
+
 }
