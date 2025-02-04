@@ -2,7 +2,9 @@ package hidra.tan.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
+import hidra.tan.logging.Log4jImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,14 @@ import hidra.tan.entities.Product;
 import hidra.tan.repositories.ProductRepository;
 import hidra.tan.repositories.UserRepository;
 
+import javax.swing.text.html.Option;
+
 @Service
 public class AppUserService {
 
+
+	@Autowired
+	private Log4jImpl logger;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -27,8 +34,8 @@ public class AppUserService {
 	public AppUser findByEmail(String email) {
 		Optional<AppUser> user = userRepository.findAll().stream().filter(u -> u.getEmail().equals(email)).findFirst();
 		return user.orElseThrow(() -> new RuntimeException("User not found with email: " + email));
-
 	}
+
 
 	public AppUser findById(Long id) {
 		return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found with id: " + id));
