@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hidra.tan.entities.*;
+import hidra.tan.logging.Log4jImpl;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,8 @@ import hidra.tan.responses.HistoryResponse;
 @Service
 public class DailyTotalHistoryService {
 
+	@Autowired
+	private Log4jImpl logger;
 	@Autowired
 	private DailyTotalHistoryRepository dailyTotalHistoryRepository;
 	@Autowired
@@ -47,6 +51,11 @@ public class DailyTotalHistoryService {
 			DailyProductHistory dailyProductHistory = new DailyProductHistory();
 			dailyProductHistory.setProduct(stockItem.getProduct());
 			dailyProductHistory.setQuantity(stockItem.getQuantity());
+		}
+		for (DailyProductHistory dailyProductHistory : dailyProductHistories) {
+			logger.logInfo(
+					"Product: " + dailyProductHistory.getProduct() 
+					+ " Quantity: " + dailyProductHistory.getQuantity());
 		}
 		return dailyProductHistories;
 	}

@@ -226,7 +226,6 @@ public class DeliveryService {
 	}
 
 
-	@Scheduled(cron = "0 */1 * * * *")
 	public void resetDailyEarnings() {
 		List<HistoryResponse> historyResponses = new ArrayList<>();
 		List<AppUser> users = userRepository.findAll();
@@ -239,7 +238,6 @@ public class DeliveryService {
 			logger.logInfo(user.getEmail());
 
 			history.setTotal(user.getDailyEarnings());
-			logger.logInfo(user.getDailyEarnings().toString());
 
 			history.setDailyProductHistories(dailyTotalHistoryService.mapToProductHistory(user.getDeliveryManStock()));
 			history.setDailyEmptyProductHistories(dailyTotalHistoryService.mapToEmptyProductHistory(user.getEmptyProducts()));

@@ -47,7 +47,7 @@ public class MailUtils {
         try{
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(FROM_EMAIL);
-            message.setTo("lucasivanestrada1@gmail.com");
+            message.setTo("lucadonofrio097@gmail.com");
             message.setSubject("Historial de Ventas Diarias");
              StringBuilder messageText = new StringBuilder();
              messageText.append("Historial de Ventas Diarias\n\n").append(LocalDate.now()).append("\n\n");
