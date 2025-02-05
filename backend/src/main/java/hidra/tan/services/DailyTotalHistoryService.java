@@ -35,15 +35,6 @@ public class DailyTotalHistoryService {
 		return dailyTotalHistoryRepository.findByDeliveryMan(user);
 	}
 
-	public HistoryResponse mapToDto(DailyTotalHistory dailyTotalHistory) {
-		HistoryResponse historyResponse = new HistoryResponse();
-		historyResponse.setTotal(dailyTotalHistory.getTotal());
-		historyResponse.setDate(dailyTotalHistory.getDate().toString());
-		historyResponse.setDeliveryMail(dailyTotalHistory.getDeliveryMan().getEmail());
-		historyResponse.setEmptyProducts(dailyTotalHistory.getDailyEmptyProductHistories());
-		historyResponse.setProducts(dailyTotalHistory.getDailyProductHistories());
-		return historyResponse;
-	}
 
 	public List<DailyProductHistory> mapToProductHistory(List<DeliveryManStock> stock) {
 		List<DailyProductHistory> dailyProductHistories = new ArrayList<>();

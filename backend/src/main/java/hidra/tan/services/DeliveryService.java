@@ -8,10 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import hidra.tan.logging.Log4jImpl;
-import hidra.tan.responses.HistoryResponse;
-import hidra.tan.utils.MailUtils;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,18 +16,21 @@ import org.springframework.stereotype.Service;
 import hidra.tan.entities.AppClient;
 import hidra.tan.entities.AppUser;
 import hidra.tan.entities.ClientStock;
-import hidra.tan.entities.DailyTotalHistory;
 import hidra.tan.entities.Delivery;
 import hidra.tan.entities.DeliveryManStock;
 import hidra.tan.entities.EmptyProduct;
+import hidra.tan.logging.Log4jImpl;
 import hidra.tan.repositories.ClientStockRepository;
-import hidra.tan.repositories.DailyTotalHistoryRepository;
 import hidra.tan.repositories.DeliveryManStockRepository;
 import hidra.tan.repositories.DeliveryRepository;
 import hidra.tan.repositories.UserRepository;
 import hidra.tan.responses.DeliveryDto;
 import hidra.tan.responses.DeliveryViewResponse;
+import hidra.tan.responses.MailDailyResponse;
+import hidra.tan.responses.ProductMailResponse;
+import hidra.tan.utils.MailUtils;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -41,10 +40,6 @@ public class DeliveryService {
 	@Autowired
 	private MailUtils mailUtils;
 	@Autowired
-	private DailyTotalHistoryService dailyTotalHistoryService;
-	@Autowired
-	private Log4jImpl logger;
-	@Autowired
 	private DeliveryRepository deliveryRepository;
 	@Autowired
 	private AppUserService appUserService;
@@ -53,13 +48,15 @@ public class DeliveryService {
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
-	private DailyTotalHistoryRepository dailyTotalHistoryRepository;
-	@Autowired
 	private DeliveryManStockRepository deliveryManStockRepository;
 	@Autowired
 	private ClientStockRepository clientStockRepository;
 	@Autowired
 	private AppClientService appClientService;
+	@Autowired
+	private Log4jImpl logger;
+	
+	
 	@Transactional
 	public List<Delivery> findAll() {
 		List<Delivery> deliveries = deliveryRepository.findAll();
@@ -226,31 +223,50 @@ public class DeliveryService {
 	}
 
 
+	@Scheduled(cron = "0 */1 * * * *")
 	public void resetDailyEarnings() {
-		List<HistoryResponse> historyResponses = new ArrayList<>();
+		List<MailDailyResponse> mailList = new ArrayList<>();
 		List<AppUser> users = userRepository.findAll();
 		for (AppUser user : users) {
-			DailyTotalHistory history = new DailyTotalHistory();
-			history.setDate(new Date());
-			logger.logInfo(new Date().toString());
-
-			history.setDeliveryMan(user);
-			logger.logInfo(user.getEmail());
-
-			history.setTotal(user.getDailyEarnings());
-
-			history.setDailyProductHistories(dailyTotalHistoryService.mapToProductHistory(user.getDeliveryManStock()));
-			history.setDailyEmptyProductHistories(dailyTotalHistoryService.mapToEmptyProductHistory(user.getEmptyProducts()));
-
-			historyResponses.add(dailyTotalHistoryService.mapToDto(history));
-
-
-			user.setEmptyProducts(new ArrayList<>());
-			user.setDeliveryManStock(new ArrayList<>());
-			user.setDailyEarnings(BigDecimal.ZERO);
-			userRepository.save(user);
+			
+			logger.logInfo("Resetting daily earnings for user: " + user.getEmail());
+			logger.logInfo("Total: " + user.getDailyEarnings());
+			logger.logInfo("Date: " + new Date().toString());
+			logger.logInfo("Products: ");
+			for (DeliveryManStock product : user.getDeliveryManStock()) {
+				logger.logInfo(product.getProduct().getName() + " " + product.getQuantity());
+			}
+			logger.logInfo("Empty Products: ");
+			for (EmptyProduct product : user.getEmptyProducts()) {
+				logger.logInfo(product.getProduct().getName() + " " + product.getQuantity());
+			}
+			
+			MailDailyResponse mailDailyResponse = new MailDailyResponse();
+			
+			mailDailyResponse.setEmail(user.getEmail());
+			mailDailyResponse.setTotal(user.getDailyEarnings());
+			mailDailyResponse.setDate(new Date().toString());
+			mailDailyResponse.setProducts(new ArrayList<>());
+			
+			for (DeliveryManStock product : user.getDeliveryManStock()) {
+				mailDailyResponse.getProducts().add(
+						new ProductMailResponse(product.getProduct().getName(), product.getQuantity()));
+			}
+			mailDailyResponse.setEmptyProducts(new ArrayList<>());
+			for (EmptyProduct product : user.getEmptyProducts()) {
+				mailDailyResponse.getEmptyProducts()
+						.add(new ProductMailResponse(product.getProduct().getName(), product.getQuantity()));
+			}
+			
+			mailList.add(mailDailyResponse);
 		}
-		mailUtils.sendTotalHistory(historyResponses);
+		mailUtils.sendTotalHistory(mailList);
+		for(AppUser user : users) {
+            user.setDailyEarnings(BigDecimal.ZERO);
+            user.getEmptyProducts().clear();
+            user.getDeliveryManStock().clear();
+            userRepository.save(user);
+		}
 	}
 	
 

@@ -2,7 +2,6 @@
 package hidra.tan.controllers;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -146,15 +145,7 @@ public class ManagmentController {
 		}
 		return ResponseEntity.ok("User enabled successfully");
 	}
-    
-    @GetMapping("/histories")
-	public ResponseEntity<?> getHistory() {
-    	var list = dailyTotalHistoryService.getDailyTotalHistories();
-    	var dto = list.stream()
-                .map(h -> dailyTotalHistoryService.mapToDto(h))
-                .collect(Collectors.toList());
-		return ResponseEntity.ok(dto);
-	}
+
     
     @GetMapping("/getMatchingDeliveries")
 	public ResponseEntity<?> getMatchingDeliveries(@RequestParam String email) {

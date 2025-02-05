@@ -1,19 +1,16 @@
 package hidra.tan.utils;
 
-import hidra.tan.entities.DailyEmptyProductHistory;
-import hidra.tan.entities.DailyProductHistory;
-import hidra.tan.entities.DailyTotalHistory;
-import hidra.tan.entities.Product;
-import hidra.tan.responses.HistoryResponse;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 import hidra.tan.logging.Log4jImpl;
-
-import java.time.LocalDate;
-import java.util.List;
+import hidra.tan.responses.MailDailyResponse;
+import hidra.tan.responses.ProductMailResponse;
 
 @Component
 public class MailUtils {
@@ -43,7 +40,7 @@ public class MailUtils {
         }
     }
 
-        public void sendTotalHistory(List<HistoryResponse> list){
+        public void sendTotalHistory(List<MailDailyResponse> list){
         try{
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(FROM_EMAIL);
@@ -52,20 +49,20 @@ public class MailUtils {
              StringBuilder messageText = new StringBuilder();
              messageText.append("Historial de Ventas Diarias\n\n").append(LocalDate.now()).append("\n\n");
 
-             for(HistoryResponse history : list){
-                 messageText.append("Repartidor: ").append(history.getDeliveryMail()).append("\n");
+             for(MailDailyResponse history : list){
+                 messageText.append("Repartidor: ").append(history.getEmail()).append("\n");
                     messageText.append("Fecha: ").append(history.getDate()).append("\n");
                     messageText.append("Total: ").append(history.getTotal()).append("\n");
                     if(history.getProducts() != null){
                         messageText.append("Productos: ").append("\n");
-                        for(DailyProductHistory product : history.getProducts()){
-                            messageText.append(product.getProduct().getName()).append(product.getQuantity()).append("\n");
+                        for(ProductMailResponse product : history.getProducts()){
+                            messageText.append(product.getName()).append(": "+product.getQuantity()).append("\n");
                         }
                     }
                     if (history.getEmptyProducts() != null){
-                        messageText.append("Productos Vacios: ").append(history.getEmptyProducts()).append("\n\n");
-                        for(DailyEmptyProductHistory product : history.getEmptyProducts()){
-                            messageText.append(product.getProduct().getName()).append(product.getQuantity()).append("\n");
+                        messageText.append("Productos Vacios: ").append("\n\n");
+                        for(ProductMailResponse product : history.getProducts()){
+                            messageText.append(product.getName()).append(": "+product.getQuantity()).append("\n");
                         }
                     }
              }
