@@ -108,4 +108,16 @@ button mat-icon {
   button {
     width: 100%;
   }
+}
+
+.total-debt {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  font-weight: bold;
+}
+
+.total-debt .debt-amount {
+  color: #f44336;
+  font-size: 1.1em;
 } 

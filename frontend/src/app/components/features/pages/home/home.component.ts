@@ -17,6 +17,8 @@ import { DeliveryViewResponse } from '../../../../interfaces/DeliveryViewRespons
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, map, of } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { NotificationBellComponent } from '../../notifications/notification-bell/notification-bell.component';
+
 
 interface MenuItem {
   path: string;
@@ -39,7 +41,8 @@ interface MenuItem {
     MatCardModule,
     MatDividerModule,
     RouterModule,
-    RoleDirective
+    RoleDirective,
+    NotificationBellComponent
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']

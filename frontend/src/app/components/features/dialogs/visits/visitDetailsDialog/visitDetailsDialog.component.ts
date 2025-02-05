@@ -43,6 +43,8 @@ export class VisitDetailsDialogComponent {
   availableClientProducts: ClientStock[] = [];
   isAdmin = true;
   currentPayment: number = 0;
+  currentDebt: number = 0;
+  totalDebt: number = 0;
 
   constructor(
     public dialogRef: MatDialogRef<VisitDetailsDialogComponent>,
@@ -57,7 +59,11 @@ export class VisitDetailsDialogComponent {
     private clientService: ClientService
   ) {
     this.isAdmin = this.authService.isAdmin();
+  }
+
+  ngOnInit() {
     this.loadStocks();
+    this.totalDebt = this.data.client.debt;
   }
 
   formatDate(dateString: string): string {
@@ -178,16 +184,21 @@ export class VisitDetailsDialogComponent {
     }
   }
 
+  calculateDebt(): void {
+    this.currentDebt = this.deliveryProducts.data.reduce((total, item) => {
+      return total + (item.product.price * item.quantity);
+    }, 0);
+    this.totalDebt = this.data.client.debt + this.currentDebt;
+  }
+
   addProduct(type: 'delivery' | 'return'): void {
-    if (this.data.status === 'COMPLETED') return;
     const dialogRef = this.dialog.open(AddProductToVisitDialogComponent, {
       width: '400px',
       data: {
-        availableProducts: type === 'delivery' 
-          ? this.availableDelivererProducts.filter(stock => true)
-          : this.availableClientProducts.filter(stock => stock.product.returnable),
-        clientId: this.data.client.id,
-        type: type
+        type,
+        availableProducts: type === 'delivery' ? 
+          this.availableDelivererProducts : 
+          this.availableClientProducts.filter(p => p.product.returnable)
       }
     });
 
@@ -195,6 +206,7 @@ export class VisitDetailsDialogComponent {
       if (result) {
         if (type === 'delivery') {
           this.deliveryProducts.data = [...this.deliveryProducts.data, result];
+          this.calculateDebt();
         } else {
           this.returnProducts.data = [...this.returnProducts.data, result];
         }
@@ -203,15 +215,15 @@ export class VisitDetailsDialogComponent {
   }
 
   removeProduct(index: number, type: 'delivery' | 'return'): void {
-    if (this.data.status === 'COMPLETED') return;
     if (type === 'delivery') {
-      const currentData = this.deliveryProducts.data;
-      currentData.splice(index, 1);
-      this.deliveryProducts.data = [...currentData];
+      const newData = [...this.deliveryProducts.data];
+      newData.splice(index, 1);
+      this.deliveryProducts.data = newData;
+      this.calculateDebt();
     } else {
-      const currentData = this.returnProducts.data;
-      currentData.splice(index, 1);
-      this.returnProducts.data = [...currentData];
+      const newData = [...this.returnProducts.data];
+      newData.splice(index, 1);
+      this.returnProducts.data = newData;
     }
   }
 
@@ -220,13 +232,14 @@ export class VisitDetailsDialogComponent {
     const dialogRef = this.dialog.open(AddPaymentDialogComponent, {
       width: '400px',
       data: {
-        currentDebt: this.data.client.debt
+        currentDebt: this.totalDebt
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.currentPayment = result.amount;
+        this.totalDebt -= result.amount;
       }
     });
   }
@@ -235,14 +248,6 @@ export class VisitDetailsDialogComponent {
     if (this.data.status === 'COMPLETED') return;
     const tasks: Observable<any>[] = [];
 
-    // Payment
-    if (this.currentPayment > 0) {
-      tasks.push(
-        this.visitService.processPayment(this.data.client.id, this.currentPayment)
-      );
-    }
-
-    // Delivery products
     this.deliveryProducts.data.forEach(item => {
       tasks.push(
         this.visitService.transferProduct(
@@ -254,19 +259,25 @@ export class VisitDetailsDialogComponent {
       );
     });
 
-    // Return products
     this.returnProducts.data.forEach(item => {
       tasks.push(
         this.visitService.returnProduct(
           this.data.client.id,
           this.data.delivererEmail,
           item.product.id,
-          item.quantity
+          item.quantity,
+          item.product.price * item.quantity
         )
       );
     });
 
-  
+    tasks.push(
+      this.visitService.processPayment(
+        this.data.client.id,
+        this.totalDebt
+      )
+    );
+
     forkJoin(tasks.length > 0 ? tasks : [of(null)]).pipe(
       switchMap(() => this.visitService.completeVisit(this.data.deliverId)),
       switchMap(() => {

@@ -60,10 +60,19 @@ export class AuthenticationService {
   }
 
   private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
+    let headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
     });
+
+    if (isPlatformBrowser(this.platformId)) {
+        const token = sessionStorage.getItem('access_token');
+        if (token) {
+            headers = headers.set('Authorization', `Bearer ${token}`);
+        }
+    }
+
+    return headers;
   }
 
   private getFromStorage(key: string): string | null {

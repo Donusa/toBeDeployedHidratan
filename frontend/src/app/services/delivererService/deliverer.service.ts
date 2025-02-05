@@ -1,12 +1,14 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, catchError, throwError, of } from 'rxjs';
+import { Observable, catchError, throwError, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { map } from 'rxjs/operators';
 import { Deliverer } from '../../interfaces/deliverer.interface';
 import { AuthenticationResponse } from '../../interfaces/authenticationResponse.interface';
 import { AppUserResponse } from '../../interfaces/appUserResponse.interface';
 import { DelivererStock } from '../../interfaces/delivererStock.interface';
+import { NotificationService } from '../notificationService/notification.service';
+import { isPlatformBrowser } from '@angular/common';
 
 interface RegisterRequest {
   name: string;
@@ -24,11 +26,12 @@ export class DelivererService {
 
   constructor(
     private http: HttpClient,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private notificationService: NotificationService
   ) { }
 
   private getHeaders(): HttpHeaders {
-    const token = sessionStorage.getItem('access_token');
+    const token =sessionStorage.getItem('access_token');
     return new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -106,26 +109,45 @@ export class DelivererService {
     );
   }
 
-  deleteDeliverer(email: string): Observable<void> {
-    return this.http.post(`${this.usersUrl}/users/disable`, email, {
+  disableDeliverer(email: string, name: string): Observable<void> {
+    return this.http.post(`${this.usersUrl}/users/disable`, null, {
       headers: new HttpHeaders({
-        'Content-Type': 'text/plain'
+        'Content-Type': 'text/plain',
+        'Authorization': `Bearer ${sessionStorage.getItem('access_token')}`
       }),
+      params: new HttpParams().set('email', email),
       responseType: 'text'
     }).pipe(
-      map(() => void 0),
+      switchMap(() => this.getMatchingDeliveries(email)),
+      map(deliveries => {
+        if (deliveries.length > 0) {
+          this.notificationService.notifyDelivererDisabled(name, deliveries);
+        }
+        return;
+      }),
       catchError(error => {
         return throwError(() => new Error('Error al dar de baja al repartidor'));
       })
     );
   }
 
+  private getMatchingDeliveries(email: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.usersUrl}/getMatchingDeliveries`, {
+      params: new HttpParams().set('email', email),
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(error => {
+        console.error('Error fetching matching deliveries:', error);
+        return of([]);
+      })
+    );
+  }
+
   updateDelivererStatus(email: string, active: boolean): Observable<Deliverer> {
     const action = active ? 'enable' : 'disable';
-    return this.http.post(`${this.usersUrl}/users/${action}`, email, {
-      headers: new HttpHeaders({
-        'Content-Type': 'text/plain'
-      }),
+    return this.http.post(`${this.usersUrl}/users/${action}`, null, {
+      headers: this.getHeaders(),
+      params: new HttpParams().set('email', email),
       responseType: 'text'
     }).pipe(
       map(() => ({ email, active } as Deliverer)),
