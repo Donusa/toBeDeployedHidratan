@@ -67,6 +67,16 @@
                   <mat-icon>edit</mat-icon>
                   <span>Editar</span>
                 </button>
+                <button mat-menu-item 
+                        (click)="onDeleteDeliverer(deliverer.email)" 
+                        *ngIf="isAdmin && deliverer.active && deliverer.email !== currentUserEmail">
+                  <mat-icon>person_off</mat-icon>
+                  <span>Dar de baja</span>
+                </button>
+                <button mat-menu-item (click)="onActivateDeliverer(deliverer.email)" *ngIf="isAdmin && !deliverer.active">
+                  <mat-icon>person_add</mat-icon>
+                  <span>Dar de alta</span>
+                </button>
                 <button mat-menu-item (click)="openAddProductDialog(deliverer)" *ngIf="isAdmin && deliverer.active">
                   <mat-icon>add</mat-icon>
                   <span>Agregar Productos</span>

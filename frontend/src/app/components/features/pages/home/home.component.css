@@ -425,3 +425,16 @@ mat-menu {
     padding: 1rem;
   }
 }
+
+.mobile-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px;
+}
+
+@media screen and (min-width: 768px) {
+  .mobile-toolbar {
+    display: none;
+  }
+}

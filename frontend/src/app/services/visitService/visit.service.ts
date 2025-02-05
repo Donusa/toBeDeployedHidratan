@@ -129,14 +129,14 @@ export class VisitService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  processPayment(clientId: number, payment: number): Observable<string> {
-    if (!clientId || payment <= 0) {
+  processPayment(clientId: number, newDebt: number): Observable<string> {
+    if (!clientId) {
       return throwError(() => new Error('Datos de pago inválidos'));
     }
 
     const params = new HttpParams()
       .set('clientId', clientId.toString())
-      .set('payment', payment.toString());
+      .set('newDebt', newDebt.toString());
       
     return this.http.post(
       `${this.apiUrl}/pay`,
@@ -193,7 +193,7 @@ export class VisitService {
     );
   }
 
-  returnProduct(clientId: number, deliveryManEmail: string, productId: number, quantity: number): Observable<string> {
+  returnProduct(clientId: number, deliveryManEmail: string, productId: number, quantity: number, debt: number): Observable<string> {
     if (!clientId || !deliveryManEmail || !productId || quantity <= 0) {
       return throwError(() => new Error('Datos de retorno inválidos'));
     }
@@ -202,7 +202,8 @@ export class VisitService {
       .set('clientId', clientId.toString())
       .set('deliveryManEmail', deliveryManEmail)
       .set('productId', productId.toString())
-      .set('quantity', quantity.toString());
+      .set('quantity', quantity.toString())
+      .set('debt', debt.toString());
 
     return this.http.post(
       `${this.apiUrl}/returnProduct`,

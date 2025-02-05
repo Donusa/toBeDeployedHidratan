@@ -133,7 +133,7 @@
         <h3>Pago</h3>
         <button mat-raised-button color="accent" 
                 (click)="addPayment()" 
-                [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+                [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED' || totalDebt === 0">
           <mat-icon>add</mat-icon>
           Registrar Pago
         </button>
@@ -144,6 +144,14 @@
           <div class="detail-item">
             <span class="label">Deuda actual:</span>
             <span class="value debt-amount">{{data.client.debt | currency:'ARS':'symbol-narrow'}}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Deuda por productos a entregar:</span>
+            <span class="value debt-amount">{{currentDebt | currency:'ARS':'symbol-narrow'}}</span>
+          </div>
+          <div class="detail-item total-debt">
+            <span class="label">Deuda total:</span>
+            <span class="value debt-amount">{{totalDebt | currency:'ARS':'symbol-narrow'}}</span>
           </div>
           <div class="detail-item" *ngIf="currentPayment > 0">
             <span class="label">Pago a registrar:</span>

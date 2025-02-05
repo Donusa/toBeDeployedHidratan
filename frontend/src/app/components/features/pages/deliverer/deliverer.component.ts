@@ -53,6 +53,7 @@ export class DelivererComponent implements OnInit, AfterViewInit {
   dataSource: MatTableDataSource<Deliverer>;
   isLoading = true;
   isAdmin: boolean = false;
+  currentUserEmail: string;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -70,6 +71,7 @@ export class DelivererComponent implements OnInit, AfterViewInit {
   ) {
     this.dataSource = new MatTableDataSource<Deliverer>([]);
     this.isAdmin = this.authenticationService.isAdmin();
+    this.currentUserEmail = this.authenticationService.getCurrentEmail();
   }
 
   ngOnInit() {
@@ -267,5 +269,58 @@ export class DelivererComponent implements OnInit, AfterViewInit {
       'CANCELLED': 'Cancelado'
     };
     return statusMap[status] || status;
+  }
+
+  onDeleteDeliverer(email: string): void {
+    if (email === this.currentUserEmail) {
+      this.snackBar.open('No puedes dar de baja tu propia cuenta', 'Cerrar', {
+        duration: 3000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top'
+      });
+      return;
+    }
+
+    const deliverer = this.dataSource.data.find(d => d.email === email);
+    if (!deliverer) return;
+
+    this.delivererService.disableDeliverer(email, deliverer.name).subscribe({
+      next: () => {
+        this.loadDeliverers();
+        this.snackBar.open('Repartidor dado de baja exitosamente', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+      },
+      error: (error) => {
+        console.error('Error al dar de baja al repartidor:', error);
+        this.snackBar.open(error.message || 'Error al dar de baja al repartidor', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+      }
+    });
+  }
+
+  onEditDeliverer(deliverer: Deliverer): void {
+  }
+
+  onActivateDeliverer(email: string): void {
+    this.delivererService.updateDelivererStatus(email, true).subscribe({
+      next: () => {
+        this.loadDeliverers();
+      },
+      error: (error) => {
+
+        console.error('Error al activar al repartidor:', error);
+        this.snackBar.open('Error al activar al repartidor', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+      }
+    });
   }
 } 
