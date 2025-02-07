@@ -1,6 +1,7 @@
 
 package hidra.tan.controllers;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,6 +147,17 @@ public class ManagmentController {
 		return ResponseEntity.ok("User enabled successfully");
 	}
 
+    @PostMapping("/users/incrementEarnings")
+    public ResponseEntity<?> incrementDailyEarnings(@RequestParam String email, @RequestParam BigDecimal amount) {
+        AppUser updatedUser = appUserService.incrementDailyEarnings(email, amount);
+        return ResponseEntity.ok("Daily earnings incremented successfully");
+    }
+
+    @PostMapping("/removeProductFromDeliveryMan")
+    public ResponseEntity<?> removeProductFromDeliveryMan(@RequestParam String email, @RequestParam Long productId, @RequestParam int quantity) {
+        deliveryService.removeProductFromDeliveryMan(email, productId, quantity);
+        return ResponseEntity.ok("Product removed successfully from delivery man");
+    }
     
     @GetMapping("/getMatchingDeliveries")
 	public ResponseEntity<?> getMatchingDeliveries(@RequestParam String email) {

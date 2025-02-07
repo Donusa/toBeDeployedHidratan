@@ -41,7 +41,6 @@ export class EditDelivererDialogComponent {
     this.delivererForm = this.formBuilder.group({
       name: [data.name, [Validators.required]],
       email: [data.email, [Validators.required, Validators.email]],
-      active: [data.active],
       role: [data.role]
     });
   }
@@ -54,6 +53,7 @@ export class EditDelivererDialogComponent {
     if (this.delivererForm.valid) {
       const updatedDeliverer = {
         ...this.delivererForm.value,
+        active: this.data.active,
         products: this.data.products
       };
 

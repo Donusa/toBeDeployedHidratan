@@ -254,9 +254,12 @@ export class NewVisitDialogComponent implements OnInit {
   dateFilter = (date: Date | null): boolean => {
     if (!date) return false;
     
-    const day = date.getDay();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    return day !== 0;
+  
+    const day = date.getDay();
+    return day !== 0 && date >= today;
   }
 
   onClientSearchClick(trigger: MatAutocompleteTrigger): void {

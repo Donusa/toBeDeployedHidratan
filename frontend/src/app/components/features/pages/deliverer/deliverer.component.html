@@ -81,6 +81,10 @@
                   <mat-icon>add</mat-icon>
                   <span>Agregar Productos</span>
                 </button>
+                <button mat-menu-item (click)="openRemoveStockDialog(deliverer)" *ngIf="isAdmin && deliverer.active">
+                  <mat-icon>remove</mat-icon>
+                  <span>Quitar Productos</span>
+                </button>
                 <button mat-menu-item (click)="downloadDelivererReport(deliverer)" *ngIf="deliverer.active">
                   <mat-icon>download</mat-icon>
                   <span>Descargar Entregas</span>

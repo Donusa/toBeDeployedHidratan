@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -20,6 +20,7 @@ import { VisitService } from '../../../../services/visitService/visit.service';
 import { NewVisitDialogComponent } from '../../dialogs/visits/newVisitDialog/newVisitDialog.component';
 import { DeliveryViewResponse } from '../../../../interfaces/DeliveryViewResponse.interface';
 import { VisitDetailsDialogComponent } from '../../dialogs/visits/visitDetailsDialog/visitDetailsDialog.component';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-visit',
@@ -61,15 +62,18 @@ export class VisitComponent implements OnInit, AfterViewInit {
     private visitService: VisitService,
     private snackBar: MatSnackBar,
     private datePipe: DatePipe,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.dataSource = new MatTableDataSource<DeliveryViewResponse>([]);
     this.isAdmin = this.authService.isAdmin();
   }
 
   ngOnInit() {
-    this.checkScreenSize();
-    window.addEventListener('resize', () => this.checkScreenSize());
+    if (isPlatformBrowser(this.platformId)) {
+      this.checkScreenSize();
+      window.addEventListener('resize', () => this.checkScreenSize());
+    }
     this.loadVisits();
   }
 
@@ -93,6 +97,18 @@ export class VisitComponent implements OnInit, AfterViewInit {
             return visitDate.getTime() === today.getTime();
           });
         }
+
+        
+        this.visits.sort((a, b) => {
+        
+          if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
+          if (a.status !== 'PENDING' && b.status === 'PENDING') return 1;
+
+          const dateA = this.parseDeliveryDate(a.deliveryDate);
+          const dateB = this.parseDeliveryDate(b.deliveryDate);
+          return dateB.getTime() - dateA.getTime();
+        });
+
         this.dataSource.data = this.visits;
         this.isLoading = false;
       },
@@ -226,9 +242,15 @@ export class VisitComponent implements OnInit, AfterViewInit {
   }
 
   private checkScreenSize() {
-    this.isMobile = window.innerWidth <= 576;
-    this.displayedColumns = this.isMobile 
-      ? ['client', 'deliverer', 'date']
-      : ['client', 'deliverer', 'date', 'time', 'status'];
+    if (isPlatformBrowser(this.platformId)) {
+      this.isMobile = window.innerWidth <= 576;
+      this.displayedColumns = this.isMobile 
+        ? ['client', 'deliverer', 'date']
+        : ['client', 'deliverer', 'date', 'time', 'status'];
+    } else {
+
+      this.isMobile = false;
+      this.displayedColumns = ['client', 'deliverer', 'date', 'time', 'status'];
+    }
   }
 } 

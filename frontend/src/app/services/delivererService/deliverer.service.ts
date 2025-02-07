@@ -23,6 +23,7 @@ interface RegisterRequest {
 export class DelivererService {
   private authUrl = `${environment.apiUrl}${environment.endpoints.auth.base}`;
   private usersUrl = `${environment.apiUrl}${environment.endpoints.management.base}`;
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,
@@ -204,6 +205,31 @@ export class DelivererService {
           return of(error.error.text);
         }
         return throwError(() => new Error('Error al agregar stock al repartidor'));
+      })
+    );
+  }
+  removeStockFromDeliverer(productId: number, quantity: number, email: string): Observable<string> {
+    const params = new HttpParams()
+      .set('email', email)
+      .set('productId', productId)
+      .set('quantity', quantity);
+
+    return this.http.post(
+      `${this.usersUrl}/removeProductFromDeliveryMan`,
+      null,
+      {
+        params,
+        headers: this.getHeaders(),
+        responseType: 'text'
+      }
+    ).pipe(
+      map(response => response),
+      catchError(error => {
+        console.error('Error removing stock:', error);
+        if (error.status === 200) {
+          return of(error.error.text);
+        }
+        return throwError(() => new Error('Error al quitar stock del repartidor'));
       })
     );
   }

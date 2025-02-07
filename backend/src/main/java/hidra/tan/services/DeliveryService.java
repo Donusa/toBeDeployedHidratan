@@ -2,6 +2,9 @@ package hidra.tan.services;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,6 +29,7 @@ import hidra.tan.repositories.DeliveryRepository;
 import hidra.tan.repositories.UserRepository;
 import hidra.tan.responses.DeliveryDto;
 import hidra.tan.responses.DeliveryViewResponse;
+import hidra.tan.responses.DeliveryReportDTO;
 import hidra.tan.responses.MailDailyResponse;
 import hidra.tan.responses.ProductMailResponse;
 import hidra.tan.utils.MailUtils;
@@ -223,7 +227,7 @@ public class DeliveryService {
 	}
 
 
-	@Scheduled(cron = "0 */1 * * * *")
+	@Scheduled(cron = "0 0 20 * * *")
 	public void resetDailyEarnings() {
 		List<MailDailyResponse> mailList = new ArrayList<>();
 		List<AppUser> users = userRepository.findAll();
@@ -268,7 +272,26 @@ public class DeliveryService {
             userRepository.save(user);
 		}
 	}
-	
+
+	public void removeProductFromDeliveryMan(String deliveryManEmail, Long productId, int quantity) {
+		AppUser deliveryMan = appUserService.findByEmail(deliveryManEmail);
+		DeliveryManStock deliveryManStock = deliveryMan.getDeliveryManStock().stream()
+				.filter(stock -> stock.getProduct().getId().equals(productId))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Product not found in deliveryMan stock"));
+
+		if (deliveryManStock.getQuantity() < quantity) {
+			throw new IllegalArgumentException("Insufficient product quantity in deliveryMan stock");
+		}
+
+		deliveryManStock.setQuantity(deliveryManStock.getQuantity() - quantity);
+		if (deliveryManStock.getQuantity() == 0) {
+			deliveryMan.getDeliveryManStock().remove(deliveryManStock);
+			deliveryManStockRepository.delete(deliveryManStock);
+		} else {
+			deliveryManStockRepository.save(deliveryManStock);
+		}
+	}
 
 	public List<Delivery> getMatchingDeliveries(String email) {
 		var list = deliveryRepository.findAll().stream().filter(
@@ -277,5 +300,32 @@ public class DeliveryService {
 				)
 				.toList();
 		return list;
+	}
+
+	public List<DeliveryReportDTO> getDeliveriesTodayForReport(String delivererEmail) {
+		String today = getTodayAsString().split("T")[0];
+		return deliveryRepository.findAll().stream()
+				.filter(delivery -> {
+					String deliveryDate = delivery.getDeliveryDate().split("T")[0];
+					return deliveryDate.equals(today) &&
+							delivery.getDeliveryMan().getEmail().equals(delivererEmail);
+				})
+				.map(delivery -> {
+					int totalReturnableProducts = delivery.getClient().getClientStock().stream()
+						.filter(stock -> stock.getProduct().isReturnable())
+						.mapToInt(stock -> stock.getQuantity())
+						.sum();
+						
+					return new DeliveryReportDTO(
+						delivery.getId(),
+						delivery.getDeliveryDate(),
+						delivery.getStatus(),
+						delivery.getClient().getAddress(),
+						delivery.getClient().getPhoneNumber(),
+						delivery.getClient().getDebt(),
+						totalReturnableProducts
+					);
+				})
+				.collect(Collectors.toList());
 	}
 }

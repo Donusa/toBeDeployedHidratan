@@ -74,36 +74,50 @@ export class EditVisitDialogComponent implements OnInit {
 
   constructor(
     private dialogRef: MatDialogRef<EditVisitDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DeliveryViewResponse,
+    @Inject(MAT_DIALOG_DATA) public data: any,
     private formBuilder: FormBuilder,
     private clientService: ClientService,
     private delivererService: DelivererService,
     private visitService: VisitService,
     private snackBar: MatSnackBar
   ) {
+    const [datePart, timePart] = data.date.split('T');
+    const [day, month, year] = datePart.split('/');
+    const dateObj = new Date(`${year}-${month}-${day}`);
+
     this.visitForm = this.formBuilder.group({
       clientId: [data.client.id, Validators.required],
-      delivererId: [data.delivererEmail, Validators.required],
-      date: [this.parseDate(data.deliveryDate), Validators.required],
-      time: [this.parseTime(data.deliveryDate), [Validators.required, this.validateTime.bind(this)]]
+      delivererId: [data.deliverer.email, Validators.required],
+      date: [dateObj, Validators.required],
+      time: [timePart, [Validators.required, this.validateTime.bind(this)]]
     });
 
     this.clientSearchControl = new FormControl(data.client);
+    
     this.delivererSearchControl = new FormControl({
-      name: data.delivererName,
-      email: data.delivererEmail
+      email: data.deliverer.email,
+      name: data.deliverer.name,
+      active: true
     });
 
     this.filteredClients = this.clientSearchControl.valueChanges.pipe(
-      startWith(''),
+      startWith(data.client),
       map(value => this._filterClients(value))
     );
 
     this.filteredDeliverers = this.delivererSearchControl.valueChanges.pipe(
-      startWith(''),
+      startWith({
+        email: data.deliverer.email,
+        name: data.deliverer.name,
+        active: true
+      }),
       map(value => this._filterDeliverers(value))
     );
 
+    this.setupValidators();
+  }
+
+  private setupValidators(): void {
     this.clientSearchControl.valueChanges.subscribe(value => {
       if (typeof value === 'string') {
         this.clientSearchControl.setValidators([this.validateClientSelection.bind(this)]);
@@ -264,24 +278,39 @@ export class EditVisitDialogComponent implements OnInit {
   }
 
   private validateTime(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
     const time = control.value;
+    if (!time) return null;
+
     const [hours, minutes] = time.split(':').map(Number);
-    const date = this.visitForm.get('date')?.value;
-
-    if (!date) return null;
-
-    const dayOfWeek = new Date(date).getDay();
+    const selectedDate = this.visitForm?.get('date')?.value;
     
-    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-      if (hours < 9 || hours > 16 || (hours === 16 && minutes > 0)) {
+    if (!selectedDate) return null;
+
+    const selectedDay = selectedDate.getDay();
+    const now = new Date();
+    const today = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+
+    if (selectedDate.getTime() === today.getTime()) {
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+
+      if (hours < currentHours || (hours === currentHours && minutes < currentMinutes)) {
         return { invalidTime: true };
       }
     }
-  
-    if (dayOfWeek === 6) {
-      if (hours < 9 || hours > 13 || (hours === 13 && minutes > 0)) {
+
+    if (selectedDay === 6) {
+      if (hours < 9 || (hours === 13 && minutes > 0) || hours > 13) {
+        return { invalidTime: true };
+      }
+    } else if (selectedDay === 0) {
+      return { invalidTime: true };
+    } else {
+      if (hours < 9 || (hours === 16 && minutes > 0) || hours > 16) {
         return { invalidTime: true };
       }
     }

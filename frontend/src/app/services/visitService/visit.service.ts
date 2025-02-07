@@ -7,6 +7,7 @@ import { AuthenticationService } from '../authentication.service';
 import { DeliveryViewResponse } from '../../interfaces/DeliveryViewResponse.interface';
 import { isPlatformBrowser } from '@angular/common';
 import { ClientService } from '../clientService/client.service';
+import { DeliveryReport } from '../../interfaces/DeliveryReport.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -265,32 +266,16 @@ export class VisitService {
     );
   }
 
-  getDeliveriesToday(delivererEmail: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/today/${delivererEmail}`, {
-      headers: this.getHeaders()
+  getDeliveriesToday(delivererEmail: string): Observable<DeliveryReport[]> {
+    return this.http.get<DeliveryReport[]>(`${this.apiUrl}/report/${delivererEmail}`, {
+        headers: this.getHeaders()
     }).pipe(
-      switchMap(deliveries => {
-        if (!Array.isArray(deliveries)) {
-          return of([]);
-        }
-        
-        // Obtener todos los clientes una sola vez
-        return this.clientService.getClients().pipe(
-          map(clients => {
-            return deliveries.map(delivery => {
-              const client = clients.find(c => c.address === delivery.address);
-              return {
-                ...delivery,
-                phoneNumber: client?.phoneNumber || 'N/A'
-              };
-            });
-          })
-        );
-      }),
-      catchError(error => {
-        console.error('Error fetching deliveries:', error);
-        return throwError(() => new Error('Error al obtener los repartos de hoy'));
-      })
+        catchError(error => {
+            console.error('Error fetching deliveries:', error);
+            return throwError(() => new Error('Error al obtener los repartos de hoy'));
+        })
     );
   }
+
+
 } 

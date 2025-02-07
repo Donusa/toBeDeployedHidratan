@@ -1,4 +1,3 @@
-
 package hidra.tan.controllers;
 
 import java.math.BigDecimal;
@@ -22,6 +21,7 @@ import hidra.tan.responses.DeliveryViewResponse;
 import hidra.tan.services.AppClientService;
 import hidra.tan.services.AppUserService;
 import hidra.tan.services.DeliveryService;
+import hidra.tan.responses.DeliveryReportDTO;
 
 /**
  * Controller for handling delivery-related endpoints.
@@ -186,6 +186,16 @@ public class DeliveryController {
 	public ResponseEntity<String> payDebt(@RequestParam Long clientId, @RequestParam BigDecimal newDebt) {
 		deliveryService.payDebt(clientId, newDebt);
 		return ResponseEntity.ok("Payment processed successfully");
+	}
+
+	@GetMapping("/report/{delivererEmail}")
+	public ResponseEntity<List<DeliveryReportDTO>> getDeliveriesTodayReport(@PathVariable String delivererEmail) {
+		try {
+			List<DeliveryReportDTO> deliveries = deliveryService.getDeliveriesTodayForReport(delivererEmail);
+			return ResponseEntity.ok(deliveries);
+		} catch (Exception e) {
+			return ResponseEntity.internalServerError().build();
+		}
 	}
 }
 

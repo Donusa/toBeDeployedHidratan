@@ -10,6 +10,7 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { AppUserResponse } from '../../../../../interfaces/appUserResponse.interface';
 import { AddStockDialogComponent } from '../addStockDialog/addStockDialog.component';
+import { Deliverer } from '../../../../../interfaces/deliverer.interface';
 
 @Component({
   selector: 'app-deliverer-details-dialog',
@@ -28,72 +29,12 @@ export class DelivererDetailsDialogComponent {
   displayedColumns: string[] = ['product', 'quantity'];
 
   constructor(
-    public dialogRef: MatDialogRef<DelivererDetailsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AppUserResponse,
+    private dialogRef: MatDialogRef<DelivererDetailsDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: Deliverer,
     private visitService: VisitService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
   ) {}
-
-  downloadDeliveries(): void {
-    this.visitService.getDeliveriesToday(this.data.email).subscribe({
-      next: (deliveries) => {
-        if (deliveries.length === 0) {
-          this.snackBar.open('El repartidor no tiene entregas asignadas para hoy', 'Cerrar', {
-            duration: 3000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top'
-          });
-          return;
-        }
-
-        const doc = new jsPDF();
-        doc.text(`Entregas del día - ${this.data.name}`, 14, 16);
-
-        const columns = [
-          'ID', 
-          'Fecha', 
-          'Estado', 
-          'Cliente', 
-          'Dirección', 
-          'Producto', 
-          'Cantidad'
-        ];
-        
-        const rows = deliveries.flatMap(delivery => 
-          delivery.products.map((product: any) => [
-            delivery.id,
-            delivery.date.split('T')[0],
-            this.getStatusLabel(delivery.status),
-            delivery.clientName,
-            delivery.address,
-            product.name,
-            product.quantity
-          ])
-        );
-
-        (doc as any).autoTable({
-          head: [columns],
-          body: rows,
-          startY: 25,
-          theme: 'grid',
-          styles: { fontSize: 8 },
-          headStyles: { fillColor: [66, 66, 66] }
-        });
-
-        const fileName = `entregas-${this.data.name}-${new Date().toISOString().split('T')[0]}.pdf`;
-        doc.save(fileName);
-      },
-      error: (error) => {
-        console.error('Error fetching deliveries:', error);
-        this.snackBar.open('Error al obtener las entregas', 'Cerrar', {
-          duration: 3000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top'
-        });
-      }
-    });
-  }
 
   private getStatusLabel(status: string): string {
     const statusMap: { [key: string]: string } = {
@@ -103,6 +44,10 @@ export class DelivererDetailsDialogComponent {
       'CANCELLED': 'Cancelado'
     };
     return statusMap[status] || status;
+  }
+
+  onDownload(): void {
+    this.dialogRef.close({ action: 'download', deliverer: this.data });
   }
 
   onClose(): void {

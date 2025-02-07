@@ -1,5 +1,6 @@
 package hidra.tan.services;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,6 +107,14 @@ public class AppUserService {
 		return null;
 	}
 
+	public AppUser incrementDailyEarnings(String email, BigDecimal amount) {
+		AppUser user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+		if (user != null) {
+			user.setDailyEarnings(user.getDailyEarnings().add(amount));
+			userRepository.save(user);
+		}
+		return user;
+	}
 
 }
 

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { CommonModule, Location, DatePipe } from '@angular/common';
+import { CommonModule, Location, DatePipe, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +25,9 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { VisitService } from '../../../../services/visitService/visit.service';
 import { ClientService } from '../../../../services/clientService/client.service';
+import { RemoveStockDialogComponent } from '../../dialogs/deliverers/removeStockDialog/removeStockDialog.component';
+import { DeliveryReport } from '../../../../interfaces/DeliveryReport.interface';
+
 
 @Component({
   selector: 'app-deliverer',
@@ -176,6 +179,28 @@ export class DelivererComponent implements OnInit, AfterViewInit {
     });
   }
 
+  openRemoveStockDialog(deliverer: Deliverer): void {
+    if (!deliverer.active) {
+      this.snackBar.open('No se pueden quitar productos de un repartidor inactivo', 'Cerrar', {
+        duration: 3000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top'
+      });
+      return;
+    }
+
+    const dialogRef = this.dialog.open(RemoveStockDialogComponent, {
+      width: '600px',
+      data: { deliverer }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDeliverers();
+      }
+    });
+  }
+
   getTotalDeliverers(): number {
     return this.dataSource.data.length;
   }
@@ -209,7 +234,7 @@ export class DelivererComponent implements OnInit, AfterViewInit {
     }
 
     this.visitService.getDeliveriesToday(deliverer.email).subscribe({
-      next: (deliveries) => {
+      next: (deliveries: DeliveryReport[]) => {
         if (deliveries.length === 0) {
           this.snackBar.open('El repartidor no tiene entregas asignadas para hoy', 'Cerrar', {
             duration: 3000,
@@ -225,17 +250,23 @@ export class DelivererComponent implements OnInit, AfterViewInit {
         const columns = [
           'ID', 
           'Fecha', 
+          'Hora',
           'Estado', 
           'Dirección',
-          'Teléfono'
+          'Teléfono',
+          'Deuda',
+          'Productos Retornables'
         ];
         
         const rows = deliveries.map(delivery => [
-          delivery.id || 'N/A',
+          delivery.id.toString() || 'N/A',
           delivery.deliveryDate.split('T')[0],
+          this.formatDeliveryTime(delivery.deliveryDate),
           this.getStatusLabel(delivery.status),
           delivery.address || 'N/A',
-          delivery.phoneNumber || 'N/A'
+          delivery.phoneNumber || 'N/A',
+          delivery.debt > 0 ? `$${delivery.debt}` : '$0',
+          delivery.totalReturnableProducts > 0 ? delivery.totalReturnableProducts.toString() : 'No'
         ]);
 
         (doc as any).autoTable({
@@ -259,6 +290,16 @@ export class DelivererComponent implements OnInit, AfterViewInit {
         });
       }
     });
+  }
+
+  private formatDeliveryTime(dateString: string): string {
+    if (!dateString) return 'N/A';
+    try {
+      const [, timePart] = dateString.split('T');
+      return timePart || 'N/A';
+    } catch (error) {
+      return 'N/A';
+    }
   }
 
   private getStatusLabel(status: string): string {
