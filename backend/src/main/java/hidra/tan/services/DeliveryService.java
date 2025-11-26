@@ -22,6 +22,8 @@ import hidra.tan.entities.ClientStock;
 import hidra.tan.entities.Delivery;
 import hidra.tan.entities.DeliveryManStock;
 import hidra.tan.entities.EmptyProduct;
+import hidra.tan.entities.Product;
+import hidra.tan.enums.ClientTransactionType;
 import hidra.tan.logging.Log4jImpl;
 import hidra.tan.repositories.ClientStockRepository;
 import hidra.tan.repositories.DeliveryManStockRepository;
@@ -54,11 +56,13 @@ public class DeliveryService {
 	@Autowired
 	private DeliveryManStockRepository deliveryManStockRepository;
 	@Autowired
-	private ClientStockRepository clientStockRepository;
+    private ClientStockRepository clientStockRepository;
 	@Autowired
 	private AppClientService appClientService;
 	@Autowired
-	private Log4jImpl logger;
+    private Log4jImpl logger;
+    @Autowired
+    private ClientTransactionService clientTransactionService;
 	
 	
 	@Transactional
@@ -146,7 +150,7 @@ public class DeliveryService {
 	}
 
 	@Transactional
-	public void transferProductToClient(String deliveryManEmail, Long clientId, Long productId, int quantity) {
+    public void transferProductToClient(String deliveryManEmail, Long clientId, Long productId, int quantity) {
 		AppUser deliveryMan = appUserService.findByEmail(deliveryManEmail);
 		DeliveryManStock deliveryManStock = deliveryMan.getDeliveryManStock().stream()
 				.filter(stock -> stock.getProduct().getId().equals(productId))
@@ -155,42 +159,43 @@ public class DeliveryService {
 
 		AppClient client = appClientService.findById(clientId).orElseThrow(() -> new IllegalArgumentException("Client not found"));
 
-		Optional<ClientStock> clientStockOpt = client.getClientStock().stream()
-				.filter(stock -> stock.getProduct().getId().equals(productId))
-				.findFirst();
+        Optional<ClientStock> clientStockOpt = client.getClientStock().stream()
+                .filter(stock -> stock.getProduct().getId().equals(productId))
+                .findFirst();
 
 		if (deliveryManStock.getQuantity() >= quantity) {
 			deliveryManStock.setQuantity(deliveryManStock.getQuantity() - quantity);
 
-			if (deliveryManStock.getProduct().isReturnable()) {
-				ClientStock clientStock;
-				if (clientStockOpt.isPresent()) {
-					clientStock = clientStockOpt.get();
-					clientStock.setQuantity(clientStock.getQuantity() + quantity);
-				} else {
-					clientStock = new ClientStock();
-					clientStock.setClient(client);
-					clientStock.setProduct(deliveryManStock.getProduct());
-					clientStock.setQuantity(quantity);
-					client.getClientStock().add(clientStock);
-				}
-				clientStockRepository.save(clientStock);
-			}
+            if (deliveryManStock.getProduct().isReturnable()) {
+                ClientStock clientStock;
+                if (clientStockOpt.isPresent()) {
+                    clientStock = clientStockOpt.get();
+                    clientStock.setQuantity(clientStock.getQuantity() + quantity);
+                } else {
+                    clientStock = new ClientStock();
+                    clientStock.setClient(client);
+                    clientStock.setProduct(deliveryManStock.getProduct());
+                    clientStock.setQuantity(quantity);
+                    client.getClientStock().add(clientStock);
+                }
+                clientStockRepository.save(clientStock);
+            }
 
-			deliveryManStockRepository.save(deliveryManStock);
-		} else {
-			throw new IllegalArgumentException("Insufficient product quantity in deliveryMan stock");
-		}
-	}
+            deliveryManStockRepository.save(deliveryManStock);
+            clientTransactionService.recordProduct(client, deliveryManStock.getProduct(), quantity, client.getDebt(), ClientTransactionType.PRODUCT_DELIVERY);
+        } else {
+            throw new IllegalArgumentException("Insufficient product quantity in deliveryMan stock");
+        }
+    }
 
 	public void returnProductToDeliveryMan(Long clientId, String deliveryManEmail, Long productId, int quantity) {
 		AppClient client = appClientService.findById(clientId).orElseThrow(() -> new IllegalArgumentException("Client not found"));
 		AppUser deliveryMan = appUserService.findByEmail(deliveryManEmail);
 
-		ClientStock clientStock = client.getClientStock().stream()
-				.filter(stock -> stock.getProduct().getId().equals(productId))
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Product not found in client stock"));
+        ClientStock clientStock = client.getClientStock().stream()
+                .filter(stock -> stock.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Product not found in client stock"));
 
 		if (clientStock.getQuantity() < quantity) {
 			throw new IllegalArgumentException("Insufficient product quantity in client stock");
@@ -204,20 +209,24 @@ public class DeliveryService {
 			clientStockRepository.save(clientStock);
 		}
 
-		EmptyProduct emptyProduct = EmptyProduct.builder()
-				.appUser(deliveryMan)
-				.product(clientStock.getProduct())
-				.quantity(quantity)
-				.build();
-		deliveryMan.getEmptyProducts().add(emptyProduct);
-	}
+        EmptyProduct emptyProduct = EmptyProduct.builder()
+                .appUser(deliveryMan)
+                .product(clientStock.getProduct())
+                .quantity(quantity)
+                .build();
+        deliveryMan.getEmptyProducts().add(emptyProduct);
+        clientTransactionService.recordProduct(client, clientStock.getProduct(), quantity, client.getDebt(), ClientTransactionType.PRODUCT_RETURN);
+    }
 
-	public void payDebt(Long clientId, BigDecimal newDebt) {
-		AppClient client = appClientService.findById(clientId)
-				.orElseThrow(() -> new IllegalArgumentException("Client not found"));
-		client.setDebt(newDebt);
-		appClientService.save(client);
-	}
+    public void payDebt(Long clientId, BigDecimal newDebt) {
+        AppClient client = appClientService.findById(clientId)
+                .orElseThrow(() -> new IllegalArgumentException("Client not found"));
+        BigDecimal before = client.getDebt() == null ? BigDecimal.ZERO : client.getDebt();
+        BigDecimal amount = before.subtract(newDebt);
+        client.setDebt(newDebt);
+        appClientService.save(client);
+        clientTransactionService.recordMonetary(client, amount, before, newDebt, ClientTransactionType.MONETARY_PAYMENT);
+    }
 
 	public Delivery completeDelivery(Long deliveryId) {
 		Delivery delivery = deliveryRepository.findById(deliveryId)

@@ -21,7 +21,13 @@ import hidra.tan.responses.DeliveryViewResponse;
 import hidra.tan.services.AppClientService;
 import hidra.tan.services.AppUserService;
 import hidra.tan.services.DeliveryService;
+import hidra.tan.services.ClientTransactionService;
 import hidra.tan.responses.DeliveryReportDTO;
+import hidra.tan.requests.ClientTransactionRequest;
+import hidra.tan.entities.Product;
+import hidra.tan.enums.ClientTransactionType;
+import hidra.tan.entities.ClientTransaction;
+import hidra.tan.services.ProductService;
 
 /**
  * Controller for handling delivery-related endpoints.
@@ -37,7 +43,11 @@ public class DeliveryController {
 	private AppClientService appClientService;
 
 	@Autowired
-	private AppUserService appUserService;
+    private AppUserService appUserService;
+    @Autowired
+    private ClientTransactionService clientTransactionService;
+    @Autowired
+    private ProductService productService;
 
 	/**
 	 * Endpoint to get a view of all deliveries.
@@ -182,11 +192,44 @@ public class DeliveryController {
 	}
 
 
-	@PostMapping("/pay")
-	public ResponseEntity<String> payDebt(@RequestParam Long clientId, @RequestParam BigDecimal newDebt) {
-		deliveryService.payDebt(clientId, newDebt);
-		return ResponseEntity.ok("Payment processed successfully");
-	}
+    @PostMapping("/pay")
+    public ResponseEntity<String> payDebt(@RequestParam Long clientId, @RequestParam BigDecimal newDebt) {
+        deliveryService.payDebt(clientId, newDebt);
+        return ResponseEntity.ok("Payment processed successfully");
+    }
+
+    @GetMapping("/clients/{clientId}/transactions")
+    public ResponseEntity<?> getClientTransactions(@PathVariable Long clientId) {
+        return ResponseEntity.ok(clientTransactionService.getByClientId(clientId));
+    }
+
+    @PostMapping("/clients/{clientId}/transactions")
+    public ResponseEntity<?> addClientTransaction(@PathVariable Long clientId, @RequestBody ClientTransactionRequest request) {
+        AppClient client = appClientService.findById(clientId).orElse(null);
+        if (client == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (request.getType() == ClientTransactionType.PRODUCT_DELIVERY || request.getType() == ClientTransactionType.PRODUCT_RETURN) {
+            if (request.getProductId() == null || request.getQuantity() == null) {
+                return ResponseEntity.badRequest().body("productId y quantity son requeridos para transacciones de producto");
+            }
+            Product product = productService.findById(request.getProductId());
+            ClientTransaction tx = clientTransactionService.recordProduct(client, product, request.getQuantity(), client.getDebt(), request.getType());
+            return ResponseEntity.ok(tx);
+        } else if (request.getType() == ClientTransactionType.MONETARY_PAYMENT || request.getType() == ClientTransactionType.MONETARY_DEBT_UPDATE) {
+            BigDecimal before = client.getDebt() == null ? BigDecimal.ZERO : client.getDebt();
+            BigDecimal after = request.getDebtAfter() == null ? before : request.getDebtAfter();
+            if (request.getDebtAfter() != null) {
+                client.setDebt(after);
+                appClientService.save(client);
+            }
+            ClientTransaction tx = clientTransactionService.recordMonetary(client, request.getAmount(), before, after, request.getType());
+            return ResponseEntity.ok(tx);
+        } else {
+            return ResponseEntity.badRequest().body("Tipo de transacción inválido");
+        }
+    }
 
 	@GetMapping("/report/{delivererEmail}")
 	public ResponseEntity<List<DeliveryReportDTO>> getDeliveriesTodayReport(@PathVariable String delivererEmail) {
