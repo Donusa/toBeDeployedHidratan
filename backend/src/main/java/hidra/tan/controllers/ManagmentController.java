@@ -23,7 +23,6 @@ import hidra.tan.entities.DeliveryManStock;
 import hidra.tan.responses.AppUserResponse;
 import hidra.tan.services.AppClientService;
 import hidra.tan.services.AppUserService;
-import hidra.tan.services.DailyTotalHistoryService;
 import hidra.tan.services.DeliveryService;
 
 /**
@@ -39,9 +38,6 @@ public class ManagmentController {
 
     @Autowired
     private AppClientService appClientService;
-
-    @Autowired
-    private DailyTotalHistoryService dailyTotalHistoryService;
 
     @Autowired
     private DeliveryService deliveryService;
@@ -150,7 +146,7 @@ public class ManagmentController {
     @PostMapping("/users/incrementEarnings")
     public ResponseEntity<?> incrementDailyEarnings(@RequestParam String email, @RequestParam BigDecimal amount) {
         AppUser updatedUser = appUserService.incrementDailyEarnings(email, amount);
-        return ResponseEntity.ok("Daily earnings incremented successfully");
+        return ResponseEntity.ok("Daily earnings incremented successfully for user: " + updatedUser.getEmail());
     }
 
     @PostMapping("/removeProductFromDeliveryMan")

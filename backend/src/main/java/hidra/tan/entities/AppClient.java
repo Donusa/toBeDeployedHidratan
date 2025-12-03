@@ -26,6 +26,8 @@ public class AppClient {
 	private Integer frecuency;
 	private BigDecimal debt;
 	private String phoneNumber;
+	private String zone;
+	private String observations;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference

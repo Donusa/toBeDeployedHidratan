@@ -121,6 +121,8 @@ public class DeliveryController {
 			existingClient.setAddress(appClientDetails.getAddress());
 			existingClient.setFrecuency(appClientDetails.getFrecuency());
 			existingClient.setPhoneNumber(appClientDetails.getPhoneNumber());
+			existingClient.setZone(appClientDetails.getZone());
+			existingClient.setObservations(appClientDetails.getObservations());
 			AppClient updatedClient = appClientService.save(existingClient);
 			return ResponseEntity.ok(updatedClient);
 		}).orElse(ResponseEntity.notFound().build());

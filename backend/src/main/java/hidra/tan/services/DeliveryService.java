@@ -2,9 +2,6 @@ package hidra.tan.services;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,7 +19,6 @@ import hidra.tan.entities.ClientStock;
 import hidra.tan.entities.Delivery;
 import hidra.tan.entities.DeliveryManStock;
 import hidra.tan.entities.EmptyProduct;
-import hidra.tan.entities.Product;
 import hidra.tan.enums.ClientTransactionType;
 import hidra.tan.logging.Log4jImpl;
 import hidra.tan.repositories.ClientStockRepository;

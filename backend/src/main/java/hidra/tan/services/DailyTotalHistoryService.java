@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import hidra.tan.repositories.DailyTotalHistoryRepository;
-import hidra.tan.responses.HistoryResponse;
 
 @Service
 public class DailyTotalHistoryService {
