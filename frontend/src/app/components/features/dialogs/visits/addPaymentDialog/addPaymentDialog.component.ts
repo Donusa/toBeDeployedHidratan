@@ -29,7 +29,7 @@ export class AddPaymentDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: { currentDebt: number }
   ) {
     this.paymentForm = this.fb.group({
-      amount: ['', [Validators.required, Validators.min(1), Validators.max(data.currentDebt)]]
+      amount: ['', [Validators.required, Validators.min(1)]]
     });
   }
 

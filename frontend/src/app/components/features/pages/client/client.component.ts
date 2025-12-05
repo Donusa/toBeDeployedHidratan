@@ -8,10 +8,12 @@ import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort, Sort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { forkJoin } from 'rxjs';
 import { AuthenticationService } from '../../../../services/authentication.service';
 import { ClientService } from '../../../../services/clientService/client.service';
 import { Client } from '../../../../interfaces/client.interface';
@@ -34,6 +36,7 @@ import { EditClientDialogComponent } from '../../dialogs/clients/editClientDialo
     MatSortModule,
     MatInputModule,
     MatFormFieldModule,
+    MatSelectModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
@@ -45,12 +48,13 @@ import { EditClientDialogComponent } from '../../dialogs/clients/editClientDialo
   providers: [DatePipe]
 })
 export class ClientComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['address', 'debt', 'phoneNumber', 'frecuency'];
+  displayedColumns: string[] = ['address', 'debt', 'phoneNumber', 'frecuency', 'zone', 'observations'];
   dataSource: MatTableDataSource<Client>;
   isLoading = true;
   isMobile = window.innerWidth <= 576;
   isAdmin = false;
   clients: Client[] = [];
+  filterField: 'address' | 'phoneNumber' | 'frecuency' | 'debt' | 'zone' | 'observations' = 'address';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -79,6 +83,25 @@ export class ClientComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.dataSource.filterPredicate = (data: Client, filter: string) => {
+      const value = (filter || '').toLowerCase();
+      switch (this.filterField) {
+        case 'address':
+          return (data.address || '').toLowerCase().includes(value);
+        case 'phoneNumber':
+          return (data.phoneNumber || '').toLowerCase().includes(value);
+        case 'frecuency':
+          return String(data.frecuency ?? '').toLowerCase().includes(value);
+        case 'debt':
+          return String(data.debt ?? '').toLowerCase().includes(value);
+        case 'zone':
+          return (data.zone || '').toLowerCase().includes(value);
+        case 'observations':
+          return (data.observations || '').toLowerCase().includes(value);
+        default:
+          return true;
+      }
+    };
   }
 
   loadClients() {
@@ -120,8 +143,8 @@ export class ClientComponent implements OnInit, AfterViewInit {
   private checkScreenSize() {
     this.isMobile = window.innerWidth <= 576;
     this.displayedColumns = this.isMobile 
-      ? ['address', 'debt', 'phoneNumber']
-      : ['address', 'debt', 'phoneNumber', 'frecuency'];
+      ? ['address', 'zone', 'phoneNumber']
+      : ['address', 'debt', 'phoneNumber', 'frecuency', 'zone', 'observations'];
   }
 
   applyFilter(event: Event) {
@@ -139,19 +162,35 @@ export class ClientComponent implements OnInit, AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-            this.clientService.createClient(result).subscribe({
-                next: (newClient) => {
-                    this.loadClients();
-                    this.snackBar.open('Cliente creado exitosamente', 'Cerrar', {
-                        duration: 3000
-                    });
+      if (result) {
+        this.clientService.createClient(result).subscribe({
+          next: (newClient) => {
+            const stockItems = Array.isArray(result.initialStock) ? result.initialStock : [];
+            if (newClient?.id && stockItems.length) {
+              const requests = stockItems
+                .filter((s: any) => s && Number(s.productId) && Number(s.quantity) > 0)
+                .map((s: any) => this.clientService.addClientStock(newClient.id, Number(s.productId), Number(s.quantity)));
+
+              forkJoin(requests).subscribe({
+                next: () => {
+                  this.loadClients();
+                  this.snackBar.open('Cliente creado exitosamente', 'Cerrar', { duration: 3000 });
                 },
-                error: (error) => {
-                    this.showError('Error al crear el cliente');
+                error: () => {
+                  this.showError('Error al agregar stock inicial');
+                  this.loadClients();
                 }
-            });
-        }
+              });
+            } else {
+              this.loadClients();
+              this.snackBar.open('Cliente creado exitosamente', 'Cerrar', { duration: 3000 });
+            }
+          },
+          error: () => {
+            this.showError('Error al crear el cliente');
+          }
+        });
+      }
     });
   }
 
@@ -162,12 +201,15 @@ export class ClientComponent implements OnInit, AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        const index = this.clients.findIndex(c => c.id === result.id);
-        if (index !== -1) {
-          this.clients[index] = result;
-          this.dataSource.data = [...this.clients];
-        }
+      if (!result) return;
+      if (result.deleted) {
+        this.loadClients();
+        return;
+      }
+      const index = this.clients.findIndex(c => c.id === result.id);
+      if (index !== -1) {
+        this.clients[index] = result;
+        this.dataSource.data = [...this.clients];
       }
     });
   }
@@ -181,7 +223,7 @@ export class ClientComponent implements OnInit, AfterViewInit {
   }
 
   getTotalDebt(): number {
-    return this.dataSource.data.reduce((acc, client) => acc + (client.debt || 0), 0);
+    return this.dataSource.data.reduce((acc, client) => acc + Math.max(client.debt || 0, 0), 0);
   }
 
   formatClientDate(date?: Date | null): string {

@@ -101,6 +101,13 @@
   margin-bottom: 1rem;
 }
 
+.search-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .clients-table {
   width: 100%;
 }

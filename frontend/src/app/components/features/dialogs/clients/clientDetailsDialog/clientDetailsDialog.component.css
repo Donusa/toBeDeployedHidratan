@@ -8,9 +8,22 @@
 .detail-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 8px;
   padding: 0.5rem;
   border-bottom: 1px solid #eee;
+}
+
+.detail-item strong {
+  flex: 0 0 160px;
+}
+
+.detail-item span {
+  flex: 1 1 auto;
+  text-align: left;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .stock-section {
@@ -39,3 +52,10 @@ mat-dialog-actions {
   padding: 1rem 0;
   margin-top: 1rem;
 } 
+.transactions-section {
+  margin-top: 2rem;
+}
+
+.transactions-table {
+  width: 100%;
+}

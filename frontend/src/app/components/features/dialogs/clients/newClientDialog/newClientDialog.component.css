@@ -9,6 +9,11 @@ mat-form-field {
   width: 100%;
 }
 
+mat-dialog-content {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
 mat-dialog-actions {
   padding: 1rem 0;
   gap: 1rem;

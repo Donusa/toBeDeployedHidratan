@@ -47,4 +47,8 @@ public class ClientTransactionService {
     public List<ClientTransaction> getByClientId(Long clientId) {
         return repository.findByClientIdOrderByDateDesc(clientId);
     }
+
+    public void deleteByClientId(Long clientId) {
+        repository.deleteByClientId(clientId);
+    }
 }

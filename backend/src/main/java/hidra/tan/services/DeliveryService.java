@@ -31,6 +31,8 @@ import hidra.tan.responses.DeliveryReportDTO;
 import hidra.tan.responses.MailDailyResponse;
 import hidra.tan.responses.ProductMailResponse;
 import hidra.tan.utils.MailUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,6 +61,9 @@ public class DeliveryService {
     private Log4jImpl logger;
     @Autowired
     private ClientTransactionService clientTransactionService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 	
 	
 	@Transactional
@@ -278,7 +283,7 @@ public class DeliveryService {
 		}
 	}
 
-	public void removeProductFromDeliveryMan(String deliveryManEmail, Long productId, int quantity) {
+    public void removeProductFromDeliveryMan(String deliveryManEmail, Long productId, int quantity) {
 		AppUser deliveryMan = appUserService.findByEmail(deliveryManEmail);
 		DeliveryManStock deliveryManStock = deliveryMan.getDeliveryManStock().stream()
 				.filter(stock -> stock.getProduct().getId().equals(productId))
@@ -295,8 +300,29 @@ public class DeliveryService {
 			deliveryManStockRepository.delete(deliveryManStock);
 		} else {
 			deliveryManStockRepository.save(deliveryManStock);
-		}
-	}
+        }
+    }
+
+    public void deleteClientAndRelations(Long clientId) {
+        clientTransactionService.deleteByClientId(clientId);
+
+        List<Long> deliveryIds = deliveryRepository.findAll().stream()
+                .filter(d -> d.getClient().getId().equals(clientId))
+                .map(Delivery::getId)
+                .collect(Collectors.toList());
+
+        if (!deliveryIds.isEmpty()) {
+            entityManager.createQuery("delete from DeliveryProduct dp where dp.delivery.id in :ids")
+                    .setParameter("ids", deliveryIds)
+                    .executeUpdate();
+
+            entityManager.createQuery("delete from Delivery d where d.id in :ids")
+                    .setParameter("ids", deliveryIds)
+                    .executeUpdate();
+        }
+
+        appClientService.deleteById(clientId);
+    }
 
 	public List<Delivery> getMatchingDeliveries(String email) {
 		var list = deliveryRepository.findAll().stream().filter(

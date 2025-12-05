@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +9,7 @@ import { EditClientDialogComponent } from '../editClientDialog/editClientDialog.
 import { ClientService } from '../../../../../services/clientService/client.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../../../../../services/authentication.service';
+import { ClientTransactionsDialogComponent } from '../clientTransactionsDialog/clientTransactionsDialog.component';
 
 @Component({
   selector: 'app-client-details-dialog',
@@ -23,10 +24,12 @@ import { AuthenticationService } from '../../../../../services/authentication.se
   templateUrl: './clientDetailsDialog.component.html',
   styleUrl: './clientDetailsDialog.component.css'
 })
-export class ClientDetailsDialogComponent {
+export class ClientDetailsDialogComponent implements OnInit {
   displayedColumns: string[] = ['product', 'quantity'];
   clientStock: ClientStock[] = [];
   isAdmin = false;
+  transactions: any[] = [];
+  showTransactions = false;
 
   constructor(
     public dialogRef: MatDialogRef<ClientDetailsDialogComponent>,
@@ -45,6 +48,18 @@ export class ClientDetailsDialogComponent {
         quantity: stock.quantity
       }));
     }
+  }
+
+  ngOnInit(): void {
+    this.clientService.getClientTransactions(this.client.id).subscribe({
+      next: (tx) => {
+        this.transactions = tx;
+      }
+    });
+  }
+
+  toggleTransactions(): void {
+    this.showTransactions = !this.showTransactions;
   }
 
   onClose(): void {
@@ -73,6 +88,33 @@ export class ClientDetailsDialogComponent {
               panelClass: ['error-snackbar']
             });
           }
+        });
+      }
+    });
+  }
+
+  onViewHistory(): void {
+    this.dialog.open(ClientTransactionsDialogComponent, {
+      width: '900px',
+      data: { clientId: this.client.id, client: this.client }
+    });
+  }
+
+  onDelete(): void {
+    const confirmed = typeof window !== 'undefined' ? window.confirm('¿Eliminar este cliente? Se eliminarán sus repartos y relaciones.') : true;
+    if (!confirmed) return;
+
+    this.clientService.deleteClient(this.client.id).subscribe({
+      next: () => {
+        this.snackBar.open('Cliente eliminado correctamente', 'Cerrar', {
+          duration: 3000
+        });
+        this.dialogRef.close({ deleted: true, id: this.client.id });
+      },
+      error: () => {
+        this.snackBar.open('Error al eliminar el cliente', 'Cerrar', {
+          duration: 3000,
+          panelClass: ['error-snackbar']
         });
       }
     });

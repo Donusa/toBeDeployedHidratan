@@ -20,10 +20,15 @@ import hidra.tan.entities.AppClient;
 import hidra.tan.entities.AppUser;
 import hidra.tan.entities.ClientStock;
 import hidra.tan.entities.DeliveryManStock;
+import hidra.tan.entities.Product;
 import hidra.tan.responses.AppUserResponse;
 import hidra.tan.services.AppClientService;
 import hidra.tan.services.AppUserService;
 import hidra.tan.services.DeliveryService;
+import hidra.tan.services.ClientTransactionService;
+import hidra.tan.services.ProductService;
+import hidra.tan.enums.ClientTransactionType;
+import hidra.tan.repositories.ClientStockRepository;
 
 /**
  * Controller for managing application users.
@@ -41,6 +46,12 @@ public class ManagmentController {
 
     @Autowired
     private DeliveryService deliveryService;
+    @Autowired
+    private ClientStockRepository clientStockRepository;
+    @Autowired
+    private ProductService productService;
+    @Autowired
+    private ClientTransactionService clientTransactionService;
     
     /**
      * Endpoint to list all users.
@@ -123,6 +134,56 @@ public class ManagmentController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(client.getClientStock());
+    }
+
+    @PostMapping("/clients/{clientId}/stock/add")
+    public ResponseEntity<?> addClientStock(@PathVariable Long clientId, @RequestParam Long productId, @RequestParam int quantity) {
+        AppClient client = appClientService.findById(clientId).orElseThrow(() -> new IllegalArgumentException("Client not found"));
+        Product product = productService.findById(productId);
+        if (product == null) {
+            return ResponseEntity.badRequest().body("Product not found");
+        }
+        ClientStock existing = clientStockRepository.findByClientAndProduct(client, product);
+        if (existing != null) {
+            existing.setQuantity(existing.getQuantity() + quantity);
+            clientStockRepository.save(existing);
+        } else {
+            ClientStock stock = new ClientStock();
+            stock.setClient(client);
+            stock.setProduct(product);
+            stock.setQuantity(quantity);
+            clientStockRepository.save(stock);
+            client.getClientStock().add(stock);
+            appClientService.save(client);
+        }
+        clientTransactionService.recordProduct(client, product, quantity, client.getDebt(), ClientTransactionType.PRODUCT_DELIVERY);
+        return ResponseEntity.ok("Client stock updated");
+    }
+
+    @PostMapping("/clients/{clientId}/stock/remove")
+    public ResponseEntity<?> removeClientStock(@PathVariable Long clientId, @RequestParam Long productId, @RequestParam int quantity) {
+        AppClient client = appClientService.findById(clientId).orElseThrow(() -> new IllegalArgumentException("Client not found"));
+        Product product = productService.findById(productId);
+        if (product == null) {
+            return ResponseEntity.badRequest().body("Product not found");
+        }
+        ClientStock existing = clientStockRepository.findByClientAndProduct(client, product);
+        if (existing == null) {
+            return ResponseEntity.badRequest().body("Product not found in client stock");
+        }
+        if (existing.getQuantity() < quantity) {
+            return ResponseEntity.badRequest().body("Insufficient product quantity in client stock");
+        }
+        existing.setQuantity(existing.getQuantity() - quantity);
+        if (existing.getQuantity() == 0) {
+            client.getClientStock().remove(existing);
+            clientStockRepository.delete(existing);
+            appClientService.save(client);
+        } else {
+            clientStockRepository.save(existing);
+        }
+        clientTransactionService.recordProduct(client, product, quantity, client.getDebt(), ClientTransactionType.PRODUCT_RETURN);
+        return ResponseEntity.ok("Client stock updated");
     }
 
     @PostMapping("/users/disable")

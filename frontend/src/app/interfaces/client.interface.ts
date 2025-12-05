@@ -12,5 +12,7 @@ export interface Client {
     frecuency: number;
     debt: number;
     phoneNumber: string;
+    zone?: string;
+    observations?: string;
     clientStock: ClientStock[];
 }

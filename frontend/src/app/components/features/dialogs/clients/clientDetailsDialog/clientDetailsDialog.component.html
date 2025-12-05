@@ -7,6 +7,10 @@
       <span>{{client.address}}</span>
     </div>
     <div class="detail-item">
+      <strong>Zona:</strong>
+      <span>{{client.zone || '-'}}</span>
+    </div>
+    <div class="detail-item">
       <strong>Teléfono:</strong>
       <span>{{client.phoneNumber}}</span>
     </div>
@@ -17,6 +21,10 @@
     <div class="detail-item">
       <strong>Deuda actual:</strong>
       <span>{{client.debt | currency:'ARS':'symbol-narrow'}}</span>
+    </div>
+    <div class="detail-item">
+      <strong>Observaciones:</strong>
+      <span>{{client.observations || '-'}}</span>
     </div>
   </div>
 
@@ -41,12 +49,23 @@
       <tr mat-footer-row *matFooterRowDef="displayedColumns"></tr>
     </table>
   </div>
+
+
+  
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button color="primary" (click)="onViewHistory()">
+    <mat-icon>history</mat-icon>
+    Ver historial
+  </button>
   <button mat-raised-button color="primary" (click)="onEdit()" *ngIf="isAdmin">
     <mat-icon>edit</mat-icon>
     Editar
   </button>
-</mat-dialog-actions> 
+  <button mat-raised-button color="warn" (click)="onDelete()" *ngIf="isAdmin">
+    <mat-icon>delete</mat-icon>
+    Eliminar
+  </button>
+  <button mat-button (click)="onClose()">Cerrar</button>
+</mat-dialog-actions>

@@ -10,4 +10,5 @@ import hidra.tan.entities.ClientTransaction;
 @Repository
 public interface ClientTransactionRepository extends JpaRepository<ClientTransaction, Long> {
     List<ClientTransaction> findByClientIdOrderByDateDesc(Long clientId);
+    void deleteByClientId(Long clientId);
 }

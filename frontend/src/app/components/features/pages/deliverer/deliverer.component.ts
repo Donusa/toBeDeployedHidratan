@@ -265,7 +265,7 @@ export class DelivererComponent implements OnInit, AfterViewInit {
           this.getStatusLabel(delivery.status),
           delivery.address || 'N/A',
           delivery.phoneNumber || 'N/A',
-          delivery.debt > 0 ? `$${delivery.debt}` : '$0',
+          new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(delivery.debt || 0),
           delivery.totalReturnableProducts > 0 ? delivery.totalReturnableProducts.toString() : 'No'
         ]);
 

@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, map, catchError, throwError } from 'rxjs';
 import { Client } from '../../interfaces/client.interface';
 import { environment } from '../../../environments/environment';
 import { ClientStock } from '../../interfaces/clientStock.interface';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -11,11 +12,20 @@ import { ClientStock } from '../../interfaces/clientStock.interface';
 export class ClientService {
   private apiUrl = `${environment.apiUrl}${environment.endpoints.clients.base}`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) { }
 
   private getHeaders(): HttpHeaders {
-    const token = sessionStorage.getItem('access_token');
-    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
+    if (isPlatformBrowser(this.platformId)) {
+      const token = sessionStorage.getItem('access_token');
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+    }
+    return headers;
   }
 
   getClients(): Observable<Client[]> {
@@ -38,6 +48,8 @@ export class ClientService {
       debt: client.debt,
       frecuency: client.frecuency,
       phoneNumber: client.phoneNumber,
+      zone: client.zone,
+      observations: client.observations,
       clientProducts: []
     }, { 
       headers: this.getHeaders() 
@@ -53,5 +65,44 @@ export class ClientService {
         return throwError(() => new Error('Error al obtener el stock del cliente'));
       })
     );
+  }
+
+  getClientTransactions(clientId: number): Observable<any[]> {
+    const url = `${environment.apiUrl}${environment.endpoints.delivery.base}/clients/${clientId}/transactions`;
+    return this.http.get<any[]>(url, {
+      headers: this.getHeaders()
+    });
+  }
+
+  addClientStock(clientId: number, productId: number, quantity: number): Observable<string> {
+    const url = `${environment.apiUrl}${environment.endpoints.management.base}/clients/${clientId}/stock/add`;
+    const params = new HttpParams()
+      .set('productId', productId)
+      .set('quantity', quantity);
+    return this.http.post(url, null, {
+      headers: this.getHeaders(),
+      params,
+      responseType: 'text'
+    }).pipe(map(() => 'OK'));
+  }
+
+  removeClientStock(clientId: number, productId: number, quantity: number): Observable<string> {
+    const url = `${environment.apiUrl}${environment.endpoints.management.base}/clients/${clientId}/stock/remove`;
+    const params = new HttpParams()
+      .set('productId', productId)
+      .set('quantity', quantity);
+    return this.http.post(url, null, {
+      headers: this.getHeaders(),
+      params,
+      responseType: 'text'
+    }).pipe(map(() => 'OK'));
+  }
+
+  deleteClient(clientId: number): Observable<string> {
+    const url = `${this.apiUrl}${environment.endpoints.delivery.updateClient.replace('{id}', clientId.toString())}`;
+    return this.http.delete(url, {
+      headers: this.getHeaders(),
+      responseType: 'text'
+    }).pipe(map(() => 'OK'));
   }
 }
