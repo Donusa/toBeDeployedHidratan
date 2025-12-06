@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,7 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { ProductService } from '../../../../../services/productService/product.service';
 import { AddProductToVisitDialogComponent } from '../addProductToVisitDialog/addProductToVisitDialog.component';
 import { DatePipe } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { AddPaymentDialogComponent } from '../addPaymentDialog/addPaymentDialog.component';
 import { DelivererService } from '../../../../../services/delivererService/deliverer.service';
 import { DelivererStock } from '../../../../../interfaces/delivererStock.interface';
@@ -20,6 +21,7 @@ import { ClientStock } from '../../../../../interfaces/clientStock.interface';
 import { Observable, forkJoin, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { ConfirmDialogComponent } from '../../../../shared/confirmDialog/confirmDialog.component';
+import { ClientTransactionsDialogComponent } from '../../clients/clientTransactionsDialog/clientTransactionsDialog.component';
 
 @Component({
   selector: 'app-visit-details-dialog',
@@ -45,6 +47,7 @@ export class VisitDetailsDialogComponent {
   currentPayment: number = 0;
   currentDebt: number = 0;
   totalDebt: number = 0;
+  isMobile = false;
 
   constructor(
     public dialogRef: MatDialogRef<VisitDetailsDialogComponent>,
@@ -56,7 +59,8 @@ export class VisitDetailsDialogComponent {
     private snackBar: MatSnackBar,
     private productService: ProductService,
     private delivererService: DelivererService,
-    private clientService: ClientService
+    private clientService: ClientService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isAdmin = this.authService.isAdmin();
   }
@@ -64,6 +68,11 @@ export class VisitDetailsDialogComponent {
   ngOnInit() {
     this.loadStocks();
     this.totalDebt = this.data.client.debt;
+    if (isPlatformBrowser(this.platformId)) {
+      this.isMobile = window.innerWidth <= 576;
+    } else {
+      this.isMobile = false;
+    }
   }
 
   formatDate(dateString: string): string {
@@ -151,6 +160,14 @@ export class VisitDetailsDialogComponent {
       if (result) {
         Object.assign(this.data, result);
       }
+    });
+  }
+
+  onViewHistory(): void {
+    if (!this.data.client?.id) return;
+    this.dialog.open(ClientTransactionsDialogComponent, {
+      width: '900px',
+      data: { clientId: this.data.client.id, client: this.data.client }
     });
   }
 

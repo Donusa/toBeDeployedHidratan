@@ -164,27 +164,22 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="dialog-actions">
-  <button mat-button (click)="onClose()">
-    <mat-icon>close</mat-icon>
-    Cerrar
-  </button>
+  <button mat-button (click)="onClose()" *ngIf="isMobile">Cerrar</button>
   <div class="action-buttons">
+    <button mat-stroked-button color="primary" (click)="onViewHistory()">Ver historial</button>
     <button mat-raised-button color="warn" 
             (click)="onCancel()" 
             *ngIf="data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
-      <mat-icon>cancel</mat-icon>
       Cancelar Visita
     </button>
     <button mat-raised-button color="accent" 
             (click)="onEdit()" 
             *ngIf="isAdmin && data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
-      <mat-icon>edit</mat-icon>
       Editar
     </button>
     <button mat-raised-button color="primary" 
             (click)="onSave()" 
             *ngIf="data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
-      <mat-icon>save</mat-icon>
       Finalizar Visita
     </button>
   </div>

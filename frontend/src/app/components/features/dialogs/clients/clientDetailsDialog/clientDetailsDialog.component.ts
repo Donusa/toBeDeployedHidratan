@@ -10,6 +10,7 @@ import { ClientService } from '../../../../../services/clientService/client.serv
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../../../../../services/authentication.service';
 import { ClientTransactionsDialogComponent } from '../clientTransactionsDialog/clientTransactionsDialog.component';
+import { ConfirmDialogComponent } from '../../../../shared/confirmDialog/confirmDialog.component';
 
 @Component({
   selector: 'app-client-details-dialog',
@@ -101,22 +102,35 @@ export class ClientDetailsDialogComponent implements OnInit {
   }
 
   onDelete(): void {
-    const confirmed = typeof window !== 'undefined' ? window.confirm('¿Eliminar este cliente? Se eliminarán sus repartos y relaciones.') : true;
-    if (!confirmed) return;
-
-    this.clientService.deleteClient(this.client.id).subscribe({
-      next: () => {
-        this.snackBar.open('Cliente eliminado correctamente', 'Cerrar', {
-          duration: 3000
-        });
-        this.dialogRef.close({ deleted: true, id: this.client.id });
-      },
-      error: () => {
-        this.snackBar.open('Error al eliminar el cliente', 'Cerrar', {
-          duration: 3000,
-          panelClass: ['error-snackbar']
-        });
+    const displayName = this.client.address || `ID ${this.client.id}`;
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar cliente',
+        message: `¿Seguro que deseas eliminar al cliente "${displayName}"? Esta acción eliminará sus repartos y relaciones.`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        color: 'warn',
+        icon: 'delete'
       }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.clientService.deleteClient(this.client.id).subscribe({
+        next: () => {
+          this.snackBar.open('Cliente eliminado correctamente', 'Cerrar', {
+            duration: 3000
+          });
+          this.dialogRef.close({ deleted: true, id: this.client.id });
+        },
+        error: () => {
+          this.snackBar.open('Error al eliminar el cliente', 'Cerrar', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
     });
   }
 
