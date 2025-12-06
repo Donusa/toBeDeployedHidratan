@@ -12,6 +12,10 @@
           <mat-icon>add</mat-icon>
           Nueva Visita
         </button>
+        <button mat-raised-button color="accent" (click)="openOffRouteDelivery()">
+          <mat-icon>alt_route</mat-icon>
+          Reparto fuera de ruta
+        </button>
       </div>
     </div>
 
@@ -107,5 +111,10 @@
           *ngIf="isAdmin" 
           (click)="openNewVisitDialog()">
     <mat-icon>add</mat-icon>
+  </button>
+  <button mat-fab color="accent"
+          class="mobile-fab-button offroute"
+          (click)="openOffRouteDelivery()">
+    <mat-icon>alt_route</mat-icon>
   </button>
 </div>

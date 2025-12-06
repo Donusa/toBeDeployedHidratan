@@ -172,6 +172,10 @@
     display: block;
   }
 
+  .mobile-fab-button.offroute {
+    right: 5rem;
+  }
+
   .actions {
     display: none;
   }

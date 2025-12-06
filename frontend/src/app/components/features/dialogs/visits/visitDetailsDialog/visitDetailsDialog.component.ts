@@ -48,6 +48,7 @@ export class VisitDetailsDialogComponent {
   currentDebt: number = 0;
   totalDebt: number = 0;
   isMobile = false;
+  offRoute = false;
 
   constructor(
     public dialogRef: MatDialogRef<VisitDetailsDialogComponent>,
@@ -63,6 +64,7 @@ export class VisitDetailsDialogComponent {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isAdmin = this.authService.isAdmin();
+    this.offRoute = (this.data as any)?.offRoute === true;
   }
 
   ngOnInit() {
@@ -295,34 +297,50 @@ export class VisitDetailsDialogComponent {
       )
     );
 
-    forkJoin(tasks.length > 0 ? tasks : [of(null)]).pipe(
-      switchMap(() => this.visitService.completeVisit(this.data.deliverId)),
-      switchMap(() => {
-        const nextVisitDate = this.calculateNextVisitDate(
-          this.data.deliveryDate,
-          this.data.client.frecuency
-        );
+    if (this.offRoute) {
+      forkJoin(tasks.length > 0 ? tasks : [of(null)]).subscribe({
+        next: () => {
+          this.snackBar.open('Reparto registrado exitosamente', 'Cerrar', {
+            duration: 3000
+          });
+          this.dialogRef.close(true);
+        },
+        error: () => {
+          this.snackBar.open('Error al registrar el reparto', 'Cerrar', {
+            duration: 3000
+          });
+        }
+      });
+    } else {
+      forkJoin(tasks.length > 0 ? tasks : [of(null)]).pipe(
+        switchMap(() => this.visitService.completeVisit(this.data.deliverId)),
+        switchMap(() => {
+          const nextVisitDate = this.calculateNextVisitDate(
+            this.data.deliveryDate,
+            this.data.client.frecuency
+          );
 
-        return this.visitService.createVisit({
-          clientId: this.data.client.id,
-          delivererEmail: this.data.delivererEmail,
-          date: nextVisitDate
-        });
-      })
-    ).subscribe({
-      next: () => {
-        this.snackBar.open('Visita finalizada y reprogramada exitosamente', 'Cerrar', {
-          duration: 3000
-        });
-        this.dialogRef.close(true);
-      },
-      error: (error) => {
-        console.error('Error processing visit:', error);
-        this.snackBar.open('Error al procesar la visita', 'Cerrar', {
-          duration: 3000
-        });
-      }
-    });
+          return this.visitService.createVisit({
+            clientId: this.data.client.id,
+            delivererEmail: this.data.delivererEmail,
+            date: nextVisitDate
+          });
+        })
+      ).subscribe({
+        next: () => {
+          this.snackBar.open('Visita finalizada y reprogramada exitosamente', 'Cerrar', {
+            duration: 3000
+          });
+          this.dialogRef.close(true);
+        },
+        error: (error) => {
+          console.error('Error processing visit:', error);
+          this.snackBar.open('Error al procesar la visita', 'Cerrar', {
+            duration: 3000
+          });
+        }
+      });
+    }
   }
 
   private calculateNextVisitDate(currentDate: string, frecuency: number): string {

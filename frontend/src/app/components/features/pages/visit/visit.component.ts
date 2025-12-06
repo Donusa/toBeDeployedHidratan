@@ -20,6 +20,7 @@ import { VisitService } from '../../../../services/visitService/visit.service';
 import { NewVisitDialogComponent } from '../../dialogs/visits/newVisitDialog/newVisitDialog.component';
 import { DeliveryViewResponse } from '../../../../interfaces/DeliveryViewResponse.interface';
 import { VisitDetailsDialogComponent } from '../../dialogs/visits/visitDetailsDialog/visitDetailsDialog.component';
+import { OffRouteClientDialogComponent } from '../../dialogs/visits/offRouteClientDialog/offRouteClientDialog.component';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
@@ -238,6 +239,56 @@ export class VisitComponent implements OnInit, AfterViewInit {
       if (result) {
         this.loadVisits();
       }
+    });
+  }
+
+  private formatNow(): string {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year}T${hours}:${minutes}`;
+  }
+
+  openOffRouteDelivery() {
+    const selectDialog = this.dialog.open(OffRouteClientDialogComponent, {
+      width: '700px'
+    });
+
+    selectDialog.afterClosed().subscribe(client => {
+      if (!client) return;
+      const email = this.authService.getCurrentEmail();
+      const visitData: any = {
+        client: {
+          id: client.id,
+          address: client.address,
+          frecuency: client.frecuency,
+          debt: client.debt,
+          phoneNumber: client.phoneNumber,
+          clientStock: client.clientStock || []
+        },
+        deliverId: 0,
+        delivererName: '',
+        delivererEmail: email,
+        status: 'IN_PROGRESS',
+        deliveryDate: this.formatNow(),
+        offRoute: true
+      } as DeliveryViewResponse;
+
+      const detailsDialog = this.dialog.open(VisitDetailsDialogComponent, {
+        width: '600px',
+        data: visitData
+      });
+
+      detailsDialog.afterClosed().subscribe(result => {
+        if (result) {
+          this.snackBar.open('Reparto fuera de ruta registrado', 'Cerrar', {
+            duration: 3000
+          });
+        }
+      });
     });
   }
 

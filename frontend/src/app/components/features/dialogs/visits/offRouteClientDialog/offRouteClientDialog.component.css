@@ -1,0 +1,23 @@
+.search-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.clients-table {
+  width: 100%;
+}
+
+.client-row {
+  cursor: pointer;
+}
+
+.loading-spinner-container {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.hidden {
+  display: none;
+}
+

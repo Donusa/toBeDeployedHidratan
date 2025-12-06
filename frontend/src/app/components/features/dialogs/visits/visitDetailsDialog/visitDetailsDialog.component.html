@@ -2,7 +2,7 @@
 
 <mat-dialog-content>
   <div class="details-container">
-    <div class="detail-section">
+    <div class="detail-section" *ngIf="!offRoute">
       <div class="detail-header">
         <mat-icon>local_shipping</mat-icon>
         <h3>Información de la Visita</h3>
@@ -169,18 +169,18 @@
     <button mat-stroked-button color="primary" (click)="onViewHistory()">Ver historial</button>
     <button mat-raised-button color="warn" 
             (click)="onCancel()" 
-            *ngIf="data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
+            *ngIf="!offRoute && data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
       Cancelar Visita
     </button>
     <button mat-raised-button color="accent" 
             (click)="onEdit()" 
-            *ngIf="isAdmin && data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
+            *ngIf="!offRoute && isAdmin && data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
       Editar
     </button>
     <button mat-raised-button color="primary" 
             (click)="onSave()" 
             *ngIf="data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
-      Finalizar Visita
+      {{ offRoute ? 'Registrar' : 'Finalizar Visita' }}
     </button>
   </div>
 </mat-dialog-actions> 
