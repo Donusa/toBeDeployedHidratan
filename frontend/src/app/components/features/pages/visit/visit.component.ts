@@ -52,7 +52,7 @@ export class VisitComponent implements OnInit, AfterViewInit {
   isLoading = true;
   isAdmin = false;
   visits: DeliveryViewResponse[] = [];
-  isMobile = window.innerWidth <= 576;
+  isMobile = false;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -81,6 +81,15 @@ export class VisitComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.dataSource.filterPredicate = (data: DeliveryViewResponse, filter: string) => {
+      const value = (filter || '').trim();
+      return this.tokenMatch(value,
+        data.client?.address,
+        data.delivererName,
+        data.deliveryDate,
+        data.status
+      );
+    };
   }
 
   loadVisits() {
@@ -158,6 +167,20 @@ export class VisitComponent implements OnInit, AfterViewInit {
       console.error('Error parsing date:', error);
       return new Date(0);
     }
+  }
+
+  private normalize(s: string): string {
+    return (s ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  private tokenMatch(query: string, ...fields: Array<string | number | null | undefined>): boolean {
+    const tokens = this.normalize(query).split(/\s+/).filter(Boolean);
+    const haystack = this.normalize(fields.map(v => String(v ?? '')).join(' '));
+    return tokens.every(t => haystack.includes(t));
   }
 
   getPendingVisits(): number {

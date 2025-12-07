@@ -84,16 +84,15 @@ export class DelivererComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    
     this.dataSource.filterPredicate = (data: Deliverer, filter: string) => {
-      return data.name.toLowerCase().includes(filter) ||
-             data.email.toLowerCase().includes(filter);
+      const value = (filter || '').trim();
+      return this.tokenMatch(value, data.name, data.email, data.active ? 'activo' : 'inactivo');
     };
   }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.dataSource.filter = filterValue.trim();
 
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
@@ -111,6 +110,10 @@ export class DelivererComponent implements OnInit, AfterViewInit {
         this.dataSource = new MatTableDataSource(deliverers);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
+        this.dataSource.filterPredicate = (data: Deliverer, filter: string) => {
+          const value = (filter || '').trim();
+          return this.tokenMatch(value, data.name, data.email, data.active ? 'activo' : 'inactivo');
+        };
         this.isLoading = false;
       },
       error: (error) => {
@@ -209,7 +212,19 @@ export class DelivererComponent implements OnInit, AfterViewInit {
     return this.dataSource?.data?.filter(deliverer => deliverer.active)?.length || 0;
   }
 
+  private normalize(s: string): string {
+    return (s ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
 
+  private tokenMatch(query: string, ...fields: Array<string | number | null | undefined>): boolean {
+    const tokens = this.normalize(query).split(/\s+/).filter(Boolean);
+    const haystack = this.normalize(fields.map(v => String(v ?? '')).join(' '));
+    return tokens.every(t => haystack.includes(t));
+  }
   formatDelivererDate(date?: Date | null): string {
     if (!date) return '-';
     return this.datePipe.transform(date, 'dd/MM/yyyy') || '-';

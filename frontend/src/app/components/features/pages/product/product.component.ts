@@ -1,5 +1,5 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, AfterViewInit, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -50,7 +50,7 @@ export class ProductComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['name', 'price', 'returnable'];
   dataSource: MatTableDataSource<Product>;
   isLoading = true;
-  isMobile = window.innerWidth <= 576;
+  isMobile = false;
   isAdmin = false;
   products: Product[] = [];
 
@@ -63,15 +63,18 @@ export class ProductComponent implements OnInit, AfterViewInit {
     private authService: AuthenticationService,
     private productService: ProductService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.dataSource = new MatTableDataSource<Product>([]);
     this.isAdmin = this.authService.isAdmin();
   }
 
   ngOnInit() {
-    this.checkScreenSize();
-    window.addEventListener('resize', () => this.checkScreenSize());
+    if (isPlatformBrowser(this.platformId)) {
+      this.checkScreenSize();
+      window.addEventListener('resize', () => this.checkScreenSize());
+    }
     if (this.authService.currentUserValue) {
       this.loadProducts();
     }
@@ -80,6 +83,14 @@ export class ProductComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.dataSource.filterPredicate = (data: Product, filter: string) => {
+      const value = (filter || '').trim();
+      return this.tokenMatch(value,
+        data.name,
+        data.price,
+        data.returnable ? 'retornable' : 'no retornable'
+      );
+    };
   }
 
   loadProducts() {
@@ -106,6 +117,7 @@ export class ProductComponent implements OnInit, AfterViewInit {
   }
 
   private checkScreenSize() {
+    if (!isPlatformBrowser(this.platformId)) return;
     this.isMobile = window.innerWidth <= 576;
   }
 
@@ -116,6 +128,20 @@ export class ProductComponent implements OnInit, AfterViewInit {
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+  }
+
+  private normalize(s: string): string {
+    return (s ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  private tokenMatch(query: string, ...fields: Array<string | number | null | undefined>): boolean {
+    const tokens = this.normalize(query).split(/\s+/).filter(Boolean);
+    const haystack = this.normalize(fields.map(v => String(v ?? '')).join(' '));
+    return tokens.every(t => haystack.includes(t));
   }
 
   openNewProductDialog() {

@@ -171,18 +171,31 @@ export class EditVisitDialogComponent implements OnInit {
     return timePart || '';
   }
 
+  private normalize(s: string): string {
+    return (s ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  private tokenMatch(query: string, ...fields: Array<string | number | null | undefined>): boolean {
+    const tokens = this.normalize(query).split(/\s+/).filter(Boolean);
+    const haystack = this.normalize(fields.map(v => String(v ?? '')).join(' '));
+    return tokens.every(t => haystack.includes(t));
+  }
+
   private _filterClients(value: any): Client[] {
-    const filterValue = typeof value === 'string' ? value.toLowerCase() : '';
-    return this.clients.filter(client => 
-      client.address.toLowerCase().includes(filterValue)
+    const q = typeof value === 'string' ? value : '';
+    return this.clients.filter(client =>
+      this.tokenMatch(q, client.address, client.phoneNumber, client.zone, client.observations)
     );
   }
 
   private _filterDeliverers(value: any): any[] {
-    const filterValue = typeof value === 'string' ? value.toLowerCase() : '';
-    return this.deliverers.filter(deliverer => 
-      deliverer.name.toLowerCase().includes(filterValue) ||
-      deliverer.email.toLowerCase().includes(filterValue)
+    const q = typeof value === 'string' ? value : '';
+    return this.deliverers.filter(deliverer =>
+      this.tokenMatch(q, deliverer.name, deliverer.email)
     );
   }
 

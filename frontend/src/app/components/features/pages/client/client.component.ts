@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { CommonModule, Location, DatePipe } from '@angular/common';
+import { Component, OnInit, ViewChild, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, Location, DatePipe, isPlatformBrowser } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -51,7 +51,7 @@ export class ClientComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['address', 'debt', 'phoneNumber', 'frecuency', 'zone', 'observations'];
   dataSource: MatTableDataSource<Client>;
   isLoading = true;
-  isMobile = window.innerWidth <= 576;
+  isMobile = false;
   isAdmin = false;
   clients: Client[] = [];
   filterField: 'address' | 'phoneNumber' | 'frecuency' | 'debt' | 'zone' | 'observations' = 'address';
@@ -66,15 +66,18 @@ export class ClientComponent implements OnInit, AfterViewInit {
     private clientService: ClientService,
     private snackBar: MatSnackBar,
     private datePipe: DatePipe,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.dataSource = new MatTableDataSource<Client>([]);
     this.isAdmin = this.authService.isAdmin();
   }
 
   ngOnInit() {
-    this.checkScreenSize();
-    window.addEventListener('resize', () => this.checkScreenSize());
+    if (isPlatformBrowser(this.platformId)) {
+      this.checkScreenSize();
+      window.addEventListener('resize', () => this.checkScreenSize());
+    }
     if (this.authService.currentUserValue) {
       this.loadClients();
     }
@@ -84,20 +87,20 @@ export class ClientComponent implements OnInit, AfterViewInit {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.dataSource.filterPredicate = (data: Client, filter: string) => {
-      const value = (filter || '').toLowerCase();
+      const value = (filter || '').trim();
       switch (this.filterField) {
         case 'address':
-          return (data.address || '').toLowerCase().includes(value);
+          return this.tokenMatch(value, data.address);
         case 'phoneNumber':
-          return (data.phoneNumber || '').toLowerCase().includes(value);
+          return this.tokenMatch(value, data.phoneNumber);
         case 'frecuency':
-          return String(data.frecuency ?? '').toLowerCase().includes(value);
+          return this.tokenMatch(value, data.frecuency);
         case 'debt':
-          return String(data.debt ?? '').toLowerCase().includes(value);
+          return this.tokenMatch(value, data.debt);
         case 'zone':
-          return (data.zone || '').toLowerCase().includes(value);
+          return this.tokenMatch(value, data.zone);
         case 'observations':
-          return (data.observations || '').toLowerCase().includes(value);
+          return this.tokenMatch(value, data.observations);
         default:
           return true;
       }
@@ -141,6 +144,7 @@ export class ClientComponent implements OnInit, AfterViewInit {
   }
 
   private checkScreenSize() {
+    if (!isPlatformBrowser(this.platformId)) return;
     this.isMobile = window.innerWidth <= 576;
     this.displayedColumns = this.isMobile 
       ? ['address', 'zone', 'phoneNumber']
@@ -154,6 +158,20 @@ export class ClientComponent implements OnInit, AfterViewInit {
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+  }
+
+  private normalize(s: string): string {
+    return (s ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  private tokenMatch(query: string, ...fields: Array<string | number | null | undefined>): boolean {
+    const tokens = this.normalize(query).split(/\s+/).filter(Boolean);
+    const haystack = this.normalize(fields.map(v => String(v ?? '')).join(' '));
+    return tokens.every(t => haystack.includes(t));
   }
 
   openClientDialog() {
