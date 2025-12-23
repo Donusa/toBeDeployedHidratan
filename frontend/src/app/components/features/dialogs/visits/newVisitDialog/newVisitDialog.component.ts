@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, DateAdapter, NativeDateAdapter, MAT_DATE_LOCALE, MAT_DATE_FORMATS } from '@angular/material/core';
 import { MatAutocompleteModule, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ClientService } from '../../../../../services/clientService/client.service';
 import { DelivererService } from '../../../../../services/delivererService/deliverer.service';
 import { Observable } from 'rxjs';
@@ -33,7 +34,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatCheckboxModule
   ],
   providers: [
     {
@@ -84,7 +86,8 @@ export class NewVisitDialogComponent implements OnInit {
       clientId: ['', Validators.required],
       delivererId: ['', Validators.required],
       date: [new Date(), [Validators.required]],
-      time: [this.getCurrentTime(), [Validators.required, this.validateTime.bind(this)]]
+      time: [this.getCurrentTime(), [Validators.required, this.validateTime.bind(this)]],
+      uniqueVisit: [false]
     });
 
     this.filteredClients = this.clientSearchControl.valueChanges.pipe(
@@ -228,8 +231,11 @@ export class NewVisitDialogComponent implements OnInit {
       const visitData = {
         clientId: formValue.clientId,
         delivererEmail: selectedDeliverer.email,
-        date: formattedDate
+        date: formattedDate,
+        uniqueVisit: formValue.uniqueVisit
       };
+      
+      console.log('Submitting visit data:', visitData);
 
       this.visitService.createVisit(visitData).subscribe({
         next: () => {
@@ -254,14 +260,6 @@ export class NewVisitDialogComponent implements OnInit {
 
   onFocus(trigger: MatAutocompleteTrigger): void {
     trigger.openPanel();
-    
-    const control = trigger.autocomplete.id === 'autoClient' ? 
-      this.clientSearchControl : 
-      this.delivererSearchControl;
-      
-    if (!control.value) {
-      control.setValue('');
-    }
   }
 
   dateFilter = (date: Date | null): boolean => {
@@ -297,24 +295,37 @@ export class NewVisitDialogComponent implements OnInit {
     if (!time) return null;
 
     const [hours, minutes] = time.split(':').map(Number);
-    const now = new Date();
-    const currentHours = now.getHours();
-    const currentMinutes = now.getMinutes();
+    const selectedDate = this.visitForm?.get('date')?.value;
+    if (!selectedDate) return null;
 
-    if (hours < currentHours || (hours === currentHours && minutes < currentMinutes)) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selectedDateOnly = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate()
+    );
+
+    if (selectedDateOnly.getTime() === today.getTime()) {
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+
+      if (hours < currentHours || (hours === currentHours && minutes < currentMinutes)) {
         return { invalidTime: true };
+      }
     }
 
-    const day = new Date().getDay();
-
-    if (day === 6) {
-        if (hours < 9 || (hours === 13 && minutes > 0) || hours > 13) {
-            return { invalidTime: true };
-        }
+    const selectedDay = selectedDateOnly.getDay();
+    if (selectedDay === 6) {
+      if (hours < 9 || (hours === 13 && minutes > 0) || hours > 13) {
+        return { invalidTime: true };
+      }
+    } else if (selectedDay === 0) {
+      return { invalidTime: true };
     } else {
-        if (hours < 9 || (hours === 16 && minutes > 0) || hours > 16) {
-            return { invalidTime: true };
-        }
+      if (hours < 9 || (hours === 16 && minutes > 0) || hours > 16) {
+        return { invalidTime: true };
+      }
     }
 
     return null;

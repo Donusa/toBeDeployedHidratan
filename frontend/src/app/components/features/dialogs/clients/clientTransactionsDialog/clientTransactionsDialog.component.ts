@@ -17,7 +17,6 @@ import { ClientService } from '../../../../../services/clientService/client.serv
 export class ClientTransactionsDialogComponent implements OnInit {
   transactions: any[] = [];
   displayedColumns = ['date','type','product','quantity','amount','debtBefore','debtAfter'];
-  isMobile = window.innerWidth <= 576;
 
   constructor(
     private dialogRef: MatDialogRef<ClientTransactionsDialogComponent>,

@@ -17,18 +17,16 @@
   padding: 8px 0;
 }
 
-.detail-row {
+.detail-item {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.detail-row strong {
-  flex: 0 0 160px;
+.label {
+  font-weight: 600;
 }
 
-.detail-row span {
-  flex: 1 1 auto;
-  text-align: right;
+.value {
+  word-break: break-word;
 }

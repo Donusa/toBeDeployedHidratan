@@ -2,6 +2,7 @@ package hidra.tan.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,6 +34,9 @@ public class Delivery {
     @JsonBackReference("user-delivery")
     private AppUser deliveryMan;
     private String status;
+
+    @Column(name = "unique_visit", nullable = true)
+    private Boolean uniqueVisit;
 
     @Override
 	public String toString() {

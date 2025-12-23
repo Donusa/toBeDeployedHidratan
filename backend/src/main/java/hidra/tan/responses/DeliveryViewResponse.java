@@ -14,5 +14,6 @@ public class DeliveryViewResponse {
 	private String delivererEmail;
 	private String status;
 	private String deliveryDate;
+	private boolean uniqueVisit;
 	
 }

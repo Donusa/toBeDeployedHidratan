@@ -12,4 +12,5 @@ export interface DeliveryViewResponse {
   delivererEmail: string;
   status: string;
   deliveryDate: string;
+  uniqueVisit: boolean;
 }

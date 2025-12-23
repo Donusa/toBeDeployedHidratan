@@ -73,11 +73,17 @@ export class VisitService {
   }
 
   createVisit(visitData: any): Observable<any> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('clientId', visitData.clientId)
       .set('deliveryDate', visitData.date)
       .set('assignedDeliverer', visitData.delivererEmail)
       .set('status', 'PENDING');
+
+    if (visitData.uniqueVisit) {
+      params = params.set('uniqueVisit', 'true');
+    }
+
+    console.log('Sending createVisit request with params:', params.toString());
 
     const headers = this.getHeaders();
 

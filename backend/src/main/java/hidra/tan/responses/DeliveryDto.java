@@ -15,4 +15,5 @@ public class DeliveryDto {
     private String status;
     private String deliveryManEmail;
     private String address;
+    private boolean uniqueVisit;
 }

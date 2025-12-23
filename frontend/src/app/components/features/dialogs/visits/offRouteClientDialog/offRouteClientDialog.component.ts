@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,6 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Client } from '../../../../../interfaces/client.interface';
 import { ClientService } from '../../../../../services/clientService/client.service';
+import { NewClientDialogComponent } from '../../clients/newClientDialog/newClientDialog.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-offroute-client-dialog',
@@ -33,7 +35,8 @@ export class OffRouteClientDialogComponent implements OnInit {
 
   constructor(
     private dialogRef: MatDialogRef<OffRouteClientDialogComponent>,
-    private clientService: ClientService
+    private clientService: ClientService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -63,6 +66,44 @@ export class OffRouteClientDialogComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close();
+  }
+
+  openNewClient(): void {
+    const dialogRef = this.dialog.open(NewClientDialogComponent, {
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (!result) return;
+      this.isLoading = true;
+      this.clientService.createClient(result).subscribe({
+        next: (newClient) => {
+          const stockItems = Array.isArray(result.initialStock) ? result.initialStock : [];
+          if (newClient?.id && stockItems.length) {
+            const requests = stockItems
+              .filter((s: any) => s && Number(s.productId) && Number(s.quantity) > 0)
+              .map((s: any) => this.clientService.addClientStock(newClient.id, Number(s.productId), Number(s.quantity)));
+
+            forkJoin(requests).subscribe({
+              next: () => {
+                this.isLoading = false;
+                this.dialogRef.close(newClient);
+              },
+              error: () => {
+                this.isLoading = false;
+                this.dialogRef.close(newClient);
+              }
+            });
+          } else {
+            this.isLoading = false;
+            this.dialogRef.close(newClient);
+          }
+        },
+        error: () => {
+          this.isLoading = false;
+        }
+      });
+    });
   }
 
   private normalize(s: string): string {

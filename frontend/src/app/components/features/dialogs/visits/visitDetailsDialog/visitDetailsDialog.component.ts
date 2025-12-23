@@ -315,6 +315,9 @@ export class VisitDetailsDialogComponent {
       forkJoin(tasks.length > 0 ? tasks : [of(null)]).pipe(
         switchMap(() => this.visitService.completeVisit(this.data.deliverId)),
         switchMap(() => {
+          if (this.data.uniqueVisit) {
+            return of(null);
+          }
           const nextVisitDate = this.calculateNextVisitDate(
             this.data.deliveryDate,
             this.data.client.frecuency
@@ -328,7 +331,10 @@ export class VisitDetailsDialogComponent {
         })
       ).subscribe({
         next: () => {
-          this.snackBar.open('Visita finalizada y reprogramada exitosamente', 'Cerrar', {
+          const message = this.data.uniqueVisit 
+            ? 'Visita finalizada exitosamente'
+            : 'Visita finalizada y reprogramada exitosamente';
+          this.snackBar.open(message, 'Cerrar', {
             duration: 3000
           });
           this.dialogRef.close(true);

@@ -74,8 +74,8 @@ export class VisitComponent implements OnInit, AfterViewInit {
     if (isPlatformBrowser(this.platformId)) {
       this.checkScreenSize();
       window.addEventListener('resize', () => this.checkScreenSize());
+      this.loadVisits();
     }
-    this.loadVisits();
   }
 
   ngAfterViewInit() {
@@ -297,7 +297,8 @@ export class VisitComponent implements OnInit, AfterViewInit {
         delivererEmail: email,
         status: 'IN_PROGRESS',
         deliveryDate: this.formatNow(),
-        offRoute: true
+        offRoute: true,
+        uniqueVisit: false
       } as DeliveryViewResponse;
 
       const detailsDialog = this.dialog.open(VisitDetailsDialogComponent, {

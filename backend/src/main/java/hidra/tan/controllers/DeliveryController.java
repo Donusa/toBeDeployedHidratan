@@ -152,10 +152,11 @@ public class DeliveryController {
 
 	@PostMapping("/create")
 	public ResponseEntity<DeliveryDto> createDelivery(@RequestParam Long clientId, @RequestParam String deliveryDate,
-													  @RequestParam String assignedDeliverer, @RequestParam String status
+													  @RequestParam String assignedDeliverer, @RequestParam String status,
+													  @RequestParam(required = false) Boolean uniqueVisit
 	) {
-
-		Delivery delivery = deliveryService.createDelivery(clientId, deliveryDate, assignedDeliverer, status);
+		System.out.println("Creating delivery with uniqueVisit: " + uniqueVisit);
+		Delivery delivery = deliveryService.createDelivery(clientId, deliveryDate, assignedDeliverer, status, uniqueVisit);
 		DeliveryDto deliveryDto = deliveryService.mapToDTO(delivery);
 		return ResponseEntity.ok(deliveryDto);
 	}

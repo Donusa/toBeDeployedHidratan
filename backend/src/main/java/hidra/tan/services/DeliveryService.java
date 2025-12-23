@@ -86,12 +86,16 @@ public class DeliveryService {
 	}
 
 	public Delivery createDelivery(Long clientId, String deliveryDate, String assignedDeliverer, String status) {
+		return createDelivery(clientId, deliveryDate, assignedDeliverer, status, false);
+	}
+
+	public Delivery createDelivery(Long clientId, String deliveryDate, String assignedDeliverer, String status, Boolean uniqueVisit) {
 
 		AppUser deliveryMan = appUserService.findByEmail(assignedDeliverer);
 		AppClient client = clientService.findById(clientId).get();
 
 		final Delivery delivery = Delivery.builder().client(client).deliveryDate(deliveryDate).deliveryMan(deliveryMan)
-				.status(status).build();
+				.status(status).uniqueVisit(uniqueVisit).build();
 
 		clientService.save(client);
 		return save(delivery);
@@ -105,6 +109,7 @@ public class DeliveryService {
 				.deliveryDate(delivery.getDeliveryDate()).deliveryManEmail(delivery.getDeliveryMan().getEmail())
 				.status(delivery.getStatus())
 				.address(delivery.getClient().getAddress())
+				.uniqueVisit(Boolean.TRUE.equals(delivery.getUniqueVisit()))
 				.build();
 	}
 
@@ -114,6 +119,7 @@ public class DeliveryService {
 						.delivererName(delivery.getDeliveryMan().getName()).status(delivery.getStatus())
 						.deliveryDate(delivery.getDeliveryDate()).deliverId(delivery.getId())
 						.delivererEmail(delivery.getDeliveryMan().getEmail())
+						.uniqueVisit(Boolean.TRUE.equals(delivery.getUniqueVisit()))
 						.build())
 				.toList();
 	}

@@ -1,4 +1,9 @@
-<h2 mat-dialog-title>Detalles de la Visita</h2>
+<h2 mat-dialog-title class="dialog-title">
+  Detalles de la Visita
+  <button mat-icon-button class="dialog-close" (click)="onClose()" *ngIf="isMobile" aria-label="Cerrar">
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
 
 <mat-dialog-content>
   <div class="details-container">
@@ -164,7 +169,6 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="dialog-actions">
-  <button mat-button (click)="onClose()" *ngIf="isMobile">Cerrar</button>
   <div class="action-buttons">
     <button mat-stroked-button color="primary" (click)="onViewHistory()">Ver historial</button>
     <button mat-raised-button color="warn" 

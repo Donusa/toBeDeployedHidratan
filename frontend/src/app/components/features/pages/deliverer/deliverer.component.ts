@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { CommonModule, Location, DatePipe, CurrencyPipe } from '@angular/common';
+import { Component, OnInit, ViewChild, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, Location, DatePipe, CurrencyPipe, isPlatformBrowser } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,8 +21,6 @@ import { NewDelivererDialogComponent } from '../../dialogs/deliverers/newDeliver
 import { EditDelivererDialogComponent } from '../../dialogs/deliverers/editDelivererDialog/editDelivererDialog.component';
 import { DelivererDetailsDialogComponent } from '../../dialogs/deliverers/delivererDetailsDialog/delivererDetailsDialog.component';
 import { AddStockDialogComponent } from '../../dialogs/deliverers/addStockDialog/addStockDialog.component';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
 import { VisitService } from '../../../../services/visitService/visit.service';
 import { ClientService } from '../../../../services/clientService/client.service';
 import { RemoveStockDialogComponent } from '../../dialogs/deliverers/removeStockDialog/removeStockDialog.component';
@@ -70,7 +68,8 @@ export class DelivererComponent implements OnInit, AfterViewInit {
     private authenticationService: AuthenticationService,
     private delivererService: DelivererService,
     private visitService: VisitService,
-    private clientService: ClientService
+    private clientService: ClientService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.dataSource = new MatTableDataSource<Deliverer>([]);
     this.isAdmin = this.authenticationService.isAdmin();
@@ -78,7 +77,9 @@ export class DelivererComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    this.loadDeliverers();
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadDeliverers();
+    }
   }
 
   ngAfterViewInit() {
@@ -235,7 +236,7 @@ export class DelivererComponent implements OnInit, AfterViewInit {
     return this.datePipe.transform(date, 'HH:mm') || '-';
   }
 
-  downloadDelivererReport(deliverer: Deliverer): void {
+  async downloadDelivererReport(deliverer: Deliverer): Promise<void> {
     const token = sessionStorage.getItem('access_token');
     
     if (!token) {
@@ -247,6 +248,9 @@ export class DelivererComponent implements OnInit, AfterViewInit {
       this.router.navigate(['/login']);
       return;
     }
+
+    const { jsPDF } = await import('jspdf');
+    const autoTable = (await import('jspdf-autotable')).default as any;
 
     this.visitService.getDeliveriesToday(deliverer.email).subscribe({
       next: (deliveries: DeliveryReport[]) => {
@@ -284,7 +288,7 @@ export class DelivererComponent implements OnInit, AfterViewInit {
           delivery.totalReturnableProducts > 0 ? delivery.totalReturnableProducts.toString() : 'No'
         ]);
 
-        (doc as any).autoTable({
+        autoTable(doc, {
           head: [columns],
           body: rows,
           startY: 25,
