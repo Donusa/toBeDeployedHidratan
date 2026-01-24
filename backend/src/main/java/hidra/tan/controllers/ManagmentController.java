@@ -39,7 +39,7 @@ import hidra.tan.services.HealthDataService;
  * Controller for managing application users.
  */
 @RestController
-@PreAuthorize("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 @RequestMapping("/api/v1/management")
 public class ManagmentController {
 
