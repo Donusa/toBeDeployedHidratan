@@ -14,7 +14,7 @@ export class JwtInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = sessionStorage.getItem('access_token');
-    if (token) {
+    if (token && !request.url.includes('assets/')) {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
