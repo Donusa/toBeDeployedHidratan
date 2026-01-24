@@ -270,7 +270,7 @@ export class NewVisitDialogComponent implements OnInit {
     
   
     const day = date.getDay();
-    return day !== 0 && date >= today;
+    return day !== 0 && day !== 6 && date >= today;
   }
 
   onClientSearchClick(trigger: MatAutocompleteTrigger): void {
@@ -316,14 +316,10 @@ export class NewVisitDialogComponent implements OnInit {
     }
 
     const selectedDay = selectedDateOnly.getDay();
-    if (selectedDay === 6) {
-      if (hours < 9 || (hours === 13 && minutes > 0) || hours > 13) {
-        return { invalidTime: true };
-      }
-    } else if (selectedDay === 0) {
+    if (selectedDay === 6 || selectedDay === 0) {
       return { invalidTime: true };
     } else {
-      if (hours < 9 || (hours === 16 && minutes > 0) || hours > 16) {
+      if (hours < 9 || (hours === 18 && minutes > 0) || hours > 18) {
         return { invalidTime: true };
       }
     }

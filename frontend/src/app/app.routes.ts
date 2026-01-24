@@ -8,12 +8,18 @@ import { ProductComponent } from './components/features/pages/product/product.co
 import { VisitComponent } from './components/features/pages/visit/visit.component';
 import { ProfileComponent } from './components/features/pages/profile/profile.component';
 import { ForgotPasswordComponent } from './components/features/pages/forgot-password/forgot-password.component';
+import { BusinessManagementComponent } from './components/features/pages/business-management/business-management.component';
+import { PublicHealthInfoComponent } from './components/features/pages/public-health-info/public-health-info.component';
 
 export const routes: Routes = [
   {
     path: '',
     redirectTo: '/home',
     pathMatch: 'full'
+  },
+  {
+    path: 'public/health-info',
+    component: PublicHealthInfoComponent
   },
   {
     path: 'login',
@@ -48,6 +54,11 @@ export const routes: Routes = [
   {
     path: 'profile',
     component: ProfileComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'business-management',
+    component: BusinessManagementComponent,
     canActivate: [AuthGuardService]
   },
   {

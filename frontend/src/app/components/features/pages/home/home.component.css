@@ -40,11 +40,12 @@ mat-sidenav-container {
   width: 100%;
   overflow: hidden;
   margin: 1rem 0;
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth; Removed to avoid conflict with drag */
 }
 
 .dashboard-cards-scroll {
   display: flex;
+  width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
@@ -53,6 +54,13 @@ mat-sidenav-container {
   padding: 0.5rem;
   cursor: grab;
   user-select: none;
+  position: relative; /* Ensure z-index works if needed */
+  z-index: 1;
+}
+
+.dashboard-cards-scroll.active {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
 }
 
 .dashboard-cards-scroll::-webkit-scrollbar {

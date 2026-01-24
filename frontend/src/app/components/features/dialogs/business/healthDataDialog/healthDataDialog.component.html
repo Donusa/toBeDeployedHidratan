@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Cargar Datos de Sanidad</h2>
+<mat-dialog-content>
+  <p>Ingrese la información sanitaria requerida para el negocio.</p>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Datos de Sanidad</mat-label>
+    <textarea matInput [(ngModel)]="healthData" rows="6" placeholder="Escriba aquí..."></textarea>
+  </mat-form-field>
+
+  <div *ngIf="qrData" class="qr-container">
+    <h3>Código QR Generado</h3>
+    <div class="qr-wrapper">
+      <qrcode [qrdata]="qrData" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+    </div>
+    <p class="link-text">
+      <a [href]="generatedLink" target="_blank">Abrir información pública</a>
+    </p>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button mat-stroked-button color="accent" (click)="generateQR()" [disabled]="!healthData">
+    <mat-icon>qr_code</mat-icon>
+    Generar QR
+  </button>
+  <button mat-raised-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    Guardar
+  </button>
+</mat-dialog-actions>

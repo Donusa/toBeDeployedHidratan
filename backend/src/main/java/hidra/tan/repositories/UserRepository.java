@@ -12,5 +12,6 @@ import hidra.tan.entities.AppUser;
 public interface UserRepository extends JpaRepository<AppUser, Long>{
 
 	Optional<AppUser> findByEmail(String email);
+	Optional<AppUser> findByEmailIgnoreCase(String email);
 	Optional<AppUser> findByResetToken(String resetToken);
 }

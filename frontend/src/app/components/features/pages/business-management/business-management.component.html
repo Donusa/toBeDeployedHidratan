@@ -1,0 +1,51 @@
+<div class="business-management-container">
+  <div class="header">
+    <div class="header-left">
+      <button mat-icon-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h2>Gestión Empresarial</h2>
+    </div>
+  </div>
+
+  <mat-card class="welcome-card">
+    <mat-card-content>
+      <p>Bienvenido al módulo de Gestión Empresarial.</p>
+      <p>Aquí podrá encontrar herramientas para el análisis y configuración de su negocio.</p>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="actions-grid">
+    <mat-card class="dashboard-card">
+      <mat-card-header>
+        <mat-icon>medical_services</mat-icon>
+        <mat-card-title>Datos de Sanidad</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Cargar información sanitaria del negocio</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="openHealthDataDialog()">
+          <mat-icon>edit</mat-icon>
+          Gestionar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <mat-card class="dashboard-card">
+      <mat-card-header>
+        <mat-icon>calendar_month</mat-icon>
+        <mat-card-title>Calendario de Entregas</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Proyección de próximas visitas y rutas</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="openDeliveryCalendarDialog()">
+          <mat-icon>visibility</mat-icon>
+          Ver Calendario
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

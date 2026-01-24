@@ -159,6 +159,27 @@
                   </mat-card-actions>
                 </mat-card>
   
+                <mat-card class="dashboard-card" *appRole="'ADMIN'">
+                  <mat-card-header>
+                    <mat-icon>business</mat-icon>
+                    <mat-card-title>Gestión Empresarial</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <p>Herramientas de análisis y configuración del negocio</p>
+                    <ul class="feature-list">
+                      <li>Datos de sanidad</li>
+                      <li>Generación QR</li>
+                      <li>Calendario de visitas</li>
+                    </ul>
+                  </mat-card-content>
+                  <mat-card-actions>
+                    <button mat-raised-button color="primary" routerLink="/business-management">
+                      <mat-icon>analytics</mat-icon>
+                      Gestionar Empresa
+                    </button>
+                  </mat-card-actions>
+                </mat-card>
+
                 <mat-card class="dashboard-card" *appRole="['ADMIN', 'WORKER']">
                   <mat-card-header>
                     <mat-icon>people</mat-icon>
@@ -232,8 +253,17 @@
                 <p>Administración eficiente del equipo de distribución</p>
               </mat-card-content>
             </mat-card>
+
+            <mat-card class="dashboard-card" *appRole="'ADMIN'" routerLink="/business-management">
+              <mat-card-header>
+                <mat-icon>business</mat-icon>
+                <mat-card-title>Gestión Empresarial</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p>Herramientas de análisis y configuración del negocio</p>
+              </mat-card-content>
+            </mat-card>
   
-        
             <mat-card class="dashboard-card" *appRole="['ADMIN', 'WORKER']" routerLink="/client">
               <mat-card-header>
                 <mat-icon>people</mat-icon>

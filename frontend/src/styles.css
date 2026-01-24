@@ -1,2 +1,8 @@
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+@media (max-width: 600px) {
+  .responsive-dialog .mat-mdc-dialog-container {
+    padding: 0 !important;
+  }
+}

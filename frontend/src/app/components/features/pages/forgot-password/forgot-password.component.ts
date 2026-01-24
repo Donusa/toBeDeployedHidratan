@@ -60,7 +60,7 @@ export class ForgotPasswordComponent {
   onSubmit() {
     if (this.forgotPasswordForm.valid && !this.isSubmitting) {
       this.isSubmitting = true;
-      const email = this.forgotPasswordForm.get('email')?.value.toLowerCase();
+      const email = this.forgotPasswordForm.get('email')?.value;
       const request: AuthenticationRequest = { email: email, password: '' };
 
       this.authService.forgotPassword(request).subscribe({

@@ -60,7 +60,7 @@ export class LoginComponent {
       return;
     }
 
-    this.authService.login(this.username.toLowerCase(), this.password).subscribe({
+    this.authService.login(this.username, this.password).subscribe({
       next: (response: AuthenticationResponse) => {
         if (response && response.access_token) {
           this.router.navigate(['/home']);

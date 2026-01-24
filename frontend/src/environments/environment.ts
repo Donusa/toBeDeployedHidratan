@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://hidratan.com.ar:9000',
+  apiUrl: 'http://localhost:9000',
   endpoints: {
     auth: {
       base: '/api/v1/auth',
@@ -25,6 +25,10 @@ export const environment = {
     clients: {
       base: '/delivery',
       clients : '/clients'
+    },
+    healthData: {
+      base: '/api/public/health-data',
+      management: '/api/v1/management/health-data'
     }
   }
 }; 

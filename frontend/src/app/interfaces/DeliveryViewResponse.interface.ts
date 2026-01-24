@@ -5,6 +5,7 @@ export interface DeliveryViewResponse {
     frecuency: number;
     debt: number;
     phoneNumber: string;
+    zone?: string;
     clientStock: any[];
   };
   deliverId: number;

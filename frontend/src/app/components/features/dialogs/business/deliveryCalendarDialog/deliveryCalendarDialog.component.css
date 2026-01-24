@@ -1,0 +1,60 @@
+.calendar-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.deliveries-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.no-data {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+  font-style: italic;
+}
+
+.instruction-text {
+  text-align: center;
+  color: #666;
+  margin-top: 20px;
+}
+
+.meta-info, .meta-info-secondary {
+  font-size: 12px;
+  color: #888;
+}
+
+mat-dialog-content {
+  min-width: 300px;
+  min-height: 500px;
+  padding: 0 10px;
+}
+
+@media (max-width: 600px) {
+  mat-dialog-content {
+    min-width: unset;
+    min-height: unset;
+    max-height: 70vh;
+  }
+  
+  .calendar-container {
+    padding: 0;
+  }
+}
+
+/* Ensure calendar fits well */
+::ng-deep .mat-calendar {
+  width: 100% !important;
+}

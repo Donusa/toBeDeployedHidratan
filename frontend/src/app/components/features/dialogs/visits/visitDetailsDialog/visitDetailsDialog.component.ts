@@ -356,7 +356,9 @@ export class VisitDetailsDialogComponent {
     const date = new Date(+year, +month - 1, +day);
     date.setDate(date.getDate() + frecuency);
     
-    if (date.getDay() === 0) {
+    if (date.getDay() === 6) {
+      date.setDate(date.getDate() + 2);
+    } else if (date.getDay() === 0) {
       date.setDate(date.getDate() + 1);
     }
     

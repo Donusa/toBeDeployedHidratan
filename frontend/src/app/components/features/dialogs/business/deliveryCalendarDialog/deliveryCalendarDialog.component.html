@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>Calendario de Próximas Entregas</h2>
+<mat-dialog-content>
+  <div class="calendar-container">
+    <mat-calendar 
+      [selected]="selectedDate" 
+      (selectedChange)="onDateSelected($event)">
+    </mat-calendar>
+  </div>
+
+  <div class="deliveries-list" *ngIf="selectedDate">
+    <h3>Entregas para {{ selectedDate | date:'fullDate':'':'es-ES' }}</h3>
+    
+    <div *ngIf="isLoading" class="loading-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div *ngIf="!isLoading && projectedDeliveries.length === 0" class="no-data">
+      <p>No hay entregas calculadas para esta fecha.</p>
+    </div>
+
+    <mat-list *ngIf="!isLoading && projectedDeliveries.length > 0">
+      <mat-list-item *ngFor="let delivery of projectedDeliveries">
+        <mat-icon matListItemIcon>local_shipping</mat-icon>
+        <div matListItemTitle>{{delivery.clientName}}</div>
+        <div matListItemLine>{{delivery.address}}</div>
+        <div matListItemLine class="meta-info">
+          Repartidor: {{delivery.delivererName}} | Fecha Entrega: {{selectedDate | date:'shortDate'}}
+        </div>
+        <div matListItemLine class="meta-info-secondary">
+          Frecuencia: {{delivery.frequency}} días | Última visita: {{delivery.lastVisit | date:'shortDate'}}
+        </div>
+      </mat-list-item>
+    </mat-list>
+  </div>
+  
+  <div *ngIf="!selectedDate" class="instruction-text">
+    <p>Seleccione una fecha en el calendario para ver las entregas proyectadas.</p>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">Cerrar</button>
+</mat-dialog-actions>

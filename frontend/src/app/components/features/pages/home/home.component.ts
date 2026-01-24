@@ -83,33 +83,37 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     const container = this.cardsContainer?.nativeElement;
     if (!container) return;
     
-    container.addEventListener('mousedown', (e: MouseEvent) => {
+    const onMouseDown = (e: MouseEvent) => {
       this.isDragging = true;
       container.classList.add('active');
       this.startX = e.pageX - container.offsetLeft;
       this.scrollLeft = container.scrollLeft;
-    });
 
-    container.addEventListener('mouseleave', () => {
-      this.isDragging = false;
-      container.classList.remove('active');
-    });
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    };
 
-    container.addEventListener('mouseup', () => {
-      this.isDragging = false;
-      container.classList.remove('active');
-    });
-
-    container.addEventListener('mousemove', (e: MouseEvent) => {
+    const onMouseMove = (e: MouseEvent) => {
       if (!this.isDragging) return;
       e.preventDefault();
       const x = e.pageX - container.offsetLeft;
-      const walk = (x - this.startX) * 2;
+      const walk = (x - this.startX) * 1.5; // Adjusted speed
       container.scrollLeft = this.scrollLeft - walk;
-    });
+    };
+
+    const onMouseUp = () => {
+      this.isDragging = false;
+      container.classList.remove('active');
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    container.addEventListener('mousedown', onMouseDown);
   }
 
   getTodayDeliveries(): number {

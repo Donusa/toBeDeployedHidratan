@@ -70,7 +70,7 @@
             <td mat-cell *matCellDef="let client"> {{client.address}} </td>
           </ng-container>
 
-          <ng-container matColumnDef="debt" *ngIf="!isMobile">
+          <ng-container matColumnDef="debt">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Deuda </th>
             <td mat-cell *matCellDef="let client"> {{client.debt | currency:'ARS':'symbol-narrow'}} </td>
           </ng-container>

@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { Observable, throwError, of } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { catchError, map, tap, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthenticationService } from '../authentication.service';
@@ -270,6 +271,22 @@ export class VisitService {
         return throwError(() => new Error('Error al cancelar la visita'));
       })
     );
+  }
+
+  completeVisits(ids: number[]): Observable<any[]> {
+    if (!ids || ids.length === 0) {
+      return of([]);
+    }
+    const requests = ids.map(id => this.completeVisit(id));
+    return forkJoin(requests);
+  }
+
+  cancelVisits(ids: number[]): Observable<any[]> {
+    if (!ids || ids.length === 0) {
+      return of([]);
+    }
+    const requests = ids.map(id => this.cancelVisit(id));
+    return forkJoin(requests);
   }
 
   getDeliveriesToday(delivererEmail: string): Observable<DeliveryReport[]> {

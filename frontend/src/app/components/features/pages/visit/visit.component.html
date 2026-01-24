@@ -57,16 +57,53 @@
       </div>
 
       <div [class.hidden]="isLoading">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Buscar visita</mat-label>
-          <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por cliente, repartidor..." #input>
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
+        <div class="table-header-container">
+          <mat-form-field appearance="outline" class="search-field" *ngIf="!selection.hasValue()">
+            <mat-label>Buscar visita</mat-label>
+            <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por cliente, repartidor..." #input>
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <div class="bulk-actions" *ngIf="selection.hasValue()">
+            <span class="selected-count">{{selection.selected.length}} seleccionados</span>
+            <div class="bulk-buttons">
+              <button mat-raised-button color="primary" (click)="completeSelectedVisits()">
+                <mat-icon>check_circle</mat-icon> Completar
+              </button>
+              <button mat-raised-button color="warn" (click)="cancelSelectedVisits()">
+                <mat-icon>cancel</mat-icon> Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
 
         <table mat-table [dataSource]="dataSource" matSort class="visits-table">
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()"
+                            [aria-label]="checkboxLabel()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null"
+                            [checked]="selection.isSelected(row)"
+                            [disabled]="row.status !== 'PENDING'"
+                            [aria-label]="checkboxLabel(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="client">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Cliente </th>
             <td mat-cell *matCellDef="let visit"> {{visit.client?.address || 'N/A'}} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="zone">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Zona </th>
+            <td mat-cell *matCellDef="let visit"> {{visit.client?.zone || '-'}} </td>
           </ng-container>
 
           <ng-container matColumnDef="deliverer">

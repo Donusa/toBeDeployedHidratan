@@ -113,7 +113,7 @@ public class AuthenticationService {
         authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-        var user = userRepository.findByEmail(request.getEmail())
+        var user = userRepository.findByEmailIgnoreCase(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
@@ -217,12 +217,12 @@ public class AuthenticationService {
     }
 
 	public boolean emailExists(String email) {
-    return userRepository.findByEmail(email).isPresent();
+    return userRepository.findByEmailIgnoreCase(email).isPresent();
 }
 
 	public void updatePassword(PasswordUpdateRequest request) {
 		logger.logInfo("Updating password for user with email: " + request.getEmail());
-		AppUser user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+		AppUser user = userRepository.findByEmailIgnoreCase(request.getEmail()).orElseThrow();
 		String currPass = user.getPassword();
 		if (!passwordEncoder.matches(request.getPassword(), currPass)) {
 			throw new IllegalArgumentException("Incorrect current password");
@@ -237,7 +237,7 @@ public class AuthenticationService {
             throw new IllegalArgumentException("Email already exists");
 		}
 		logger.logInfo("Updating email for user with email: " + request.getEmail());
-        AppUser user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        AppUser user = userRepository.findByEmailIgnoreCase(request.getEmail()).orElseThrow();
         user.setEmail(request.getNewEmail());
         userRepository.save(user);
         logger.logInfo("Email updated successfully for user: " + request.getEmail());
@@ -246,7 +246,7 @@ public class AuthenticationService {
 	public void forgotPassword(AuthenticationRequest request) {
 		logger.logInfo("Processing forgot password request for email: " + request.getEmail());
 		
-		var user = userRepository.findByEmail(request.getEmail())
+		var user = userRepository.findByEmailIgnoreCase(request.getEmail())
 				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 		
 		String resetToken = generateResetToken();

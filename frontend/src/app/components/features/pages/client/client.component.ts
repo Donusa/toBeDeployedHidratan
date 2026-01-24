@@ -147,7 +147,7 @@ export class ClientComponent implements OnInit, AfterViewInit {
     if (!isPlatformBrowser(this.platformId)) return;
     this.isMobile = window.innerWidth <= 576;
     this.displayedColumns = this.isMobile 
-      ? ['address', 'zone', 'phoneNumber']
+      ? ['address', 'debt', 'zone', 'phoneNumber']
       : ['address', 'debt', 'phoneNumber', 'frecuency', 'zone', 'observations'];
   }
 

@@ -170,16 +170,20 @@
     display: none;
   }
 
-  .mat-column-name {
-    width: 30%;
-  }
-
   .mat-column-address {
-    width: 45%;
+    width: 35%;
   }
 
   .mat-column-debt {
-    width: 25%;
+    width: 20%;
+  }
+
+  .mat-column-zone {
+    width: 15%;
+  }
+
+  .mat-column-phoneNumber {
+    width: 30%;
   }
 }
 

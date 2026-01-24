@@ -11,6 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Location } from '@angular/common';
@@ -22,6 +23,7 @@ import { DeliveryViewResponse } from '../../../../interfaces/DeliveryViewRespons
 import { VisitDetailsDialogComponent } from '../../dialogs/visits/visitDetailsDialog/visitDetailsDialog.component';
 import { OffRouteClientDialogComponent } from '../../dialogs/visits/offRouteClientDialog/offRouteClientDialog.component';
 import { isPlatformBrowser } from '@angular/common';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-visit',
@@ -41,14 +43,16 @@ import { isPlatformBrowser } from '@angular/common';
     RouterModule,
     MatProgressSpinnerModule,
     MatDialogModule,
+    MatCheckboxModule
   ],
   templateUrl: './visit.component.html',
   styleUrl: './visit.component.css',
   providers: [DatePipe]
 })
 export class VisitComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['client', 'deliverer', 'date', 'time', 'status'];
+  displayedColumns: string[] = ['select', 'client', 'zone', 'deliverer', 'date', 'time', 'status'];
   dataSource: MatTableDataSource<DeliveryViewResponse>;
+  selection = new SelectionModel<DeliveryViewResponse>(true, []);
   isLoading = true;
   isAdmin = false;
   visits: DeliveryViewResponse[] = [];
@@ -290,6 +294,7 @@ export class VisitComponent implements OnInit, AfterViewInit {
           frecuency: client.frecuency,
           debt: client.debt,
           phoneNumber: client.phoneNumber,
+          zone: client.zone,
           clientStock: client.clientStock || []
         },
         deliverId: 0,
@@ -320,12 +325,90 @@ export class VisitComponent implements OnInit, AfterViewInit {
     if (isPlatformBrowser(this.platformId)) {
       this.isMobile = window.innerWidth <= 576;
       this.displayedColumns = this.isMobile 
-        ? ['client', 'deliverer', 'date']
-        : ['client', 'deliverer', 'date', 'time', 'status'];
+        ? ['select', 'client', 'deliverer', 'date']
+        : ['select', 'client', 'zone', 'deliverer', 'date', 'time', 'status'];
     } else {
 
       this.isMobile = false;
-      this.displayedColumns = ['client', 'deliverer', 'date', 'time', 'status'];
+      this.displayedColumns = ['select', 'client', 'zone', 'deliverer', 'date', 'time', 'status'];
+    }
+  }
+
+  /** Whether the number of selected elements matches the total number of selectable rows (PENDING). */
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.filter(row => row.status === 'PENDING').length;
+    return numSelected === numRows && numRows > 0;
+  }
+
+  /** Selects all PENDING rows if they are not all selected; otherwise clear selection. */
+  masterToggle() {
+    this.isAllSelected() ?
+        this.selection.clear() :
+        this.dataSource.data.forEach(row => {
+          if (row.status === 'PENDING') {
+            this.selection.select(row);
+          }
+        });
+  }
+
+  /** The label for the checkbox on the passed row */
+  checkboxLabel(row?: DeliveryViewResponse): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.deliverId}`;
+  }
+
+  completeSelectedVisits() {
+    const selectedVisits = this.selection.selected;
+    if (selectedVisits.length === 0) return;
+
+    if (confirm(`¿Estás seguro de que deseas completar ${selectedVisits.length} visitas seleccionadas?`)) {
+      this.isLoading = true;
+      const ids = selectedVisits.map(v => v.deliverId);
+      this.visitService.completeVisits(ids).subscribe({
+        next: () => {
+          this.snackBar.open(`${selectedVisits.length} visitas completadas exitosamente`, 'Cerrar', {
+            duration: 3000
+          });
+          this.selection.clear();
+          this.loadVisits();
+        },
+        error: (error) => {
+          console.error('Error completing visits:', error);
+          this.snackBar.open('Error al completar las visitas seleccionadas', 'Cerrar', {
+            duration: 3000
+          });
+          this.isLoading = false;
+        }
+      });
+    }
+  }
+
+  cancelSelectedVisits() {
+    const selectedVisits = this.selection.selected;
+    if (selectedVisits.length === 0) return;
+
+    if (confirm(`¿Estás seguro de que deseas cancelar ${selectedVisits.length} visitas seleccionadas?`)) {
+      this.isLoading = true;
+      const ids = selectedVisits.map(v => v.deliverId);
+      this.visitService.cancelVisits(ids).subscribe({
+        next: () => {
+          this.snackBar.open(`${selectedVisits.length} visitas canceladas exitosamente`, 'Cerrar', {
+            duration: 3000
+          });
+          this.selection.clear();
+          this.loadVisits();
+        },
+        error: (error) => {
+          console.error('Error canceling visits:', error);
+          this.snackBar.open('Error al cancelar las visitas seleccionadas', 'Cerrar', {
+            duration: 3000
+          });
+          this.isLoading = false;
+        }
+      });
     }
   }
 } 

@@ -40,7 +40,7 @@ public class ApplicationConfig {
 
         return username -> {
             logger.logInfo("Searching user with email: " + username);
-            return userRepository.findByEmail(username)
+            return userRepository.findByEmailIgnoreCase(username)
                     .orElseThrow(() -> {
                         logger.logError("User not found: " + username);
                         return new UsernameNotFoundException("user not found");
