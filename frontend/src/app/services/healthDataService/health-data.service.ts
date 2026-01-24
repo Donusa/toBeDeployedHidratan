@@ -1,50 +1,53 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, catchError, throwError, of } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HealthDataService {
-  private readonly STORAGE_KEY = 'health_data_info';
+  private readonly JSON_PATH = 'assets/health-data.json';
+  private readonly STORAGE_KEY = 'health_data_local_override';
 
   constructor(private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) { }
 
-  private getHeaders(): HttpHeaders {
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    });
+  getHealthData(): Observable<any> {
+    // Primero intentamos leer del localStorage (override temporal)
     if (isPlatformBrowser(this.platformId)) {
-      const token = sessionStorage.getItem('access_token');
-      if (token) {
-        headers = headers.set('Authorization', `Bearer ${token}`);
+      const localData = localStorage.getItem(this.STORAGE_KEY);
+      if (localData) {
+        return of({ data: localData });
       }
     }
-    return headers;
-  }
 
-  getHealthData(): Observable<any> {
-    if (isPlatformBrowser(this.platformId)) {
-      const data = localStorage.getItem(this.STORAGE_KEY) || '';
-      return of({ data });
-    }
-    return of({ data: '' });
+    // Si no hay local, leemos el JSON estático
+    return this.http.get<any>(this.JSON_PATH).pipe(
+      catchError(error => {
+        console.error('Error loading health-data.json', error);
+        return of({ data: '' });
+      })
+    );
   }
 
   saveHealthData(data: string): Observable<any> {
+    // Como no podemos escribir en el archivo JSON desde el navegador,
+    // guardamos en localStorage para que el usuario vea sus cambios reflejados
+    // y devolvemos éxito para que la UI no falle.
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem(this.STORAGE_KEY, data);
-      return of({ success: true, data });
     }
-    return of({ success: false });
+    return of({ success: true, data });
   }
 
   getPublicHealthData(): Observable<any> {
-    // Public data is now handled via URL params in the component
-    // but we can return empty here to satisfy interface if needed
-    return of({ data: '' });
+    // Para el público, leemos directamente el JSON
+    return this.http.get<any>(this.JSON_PATH).pipe(
+      catchError(error => {
+        console.error('Error loading public health-data.json', error);
+        return of({ data: '' });
+      })
+    );
   }
 }

@@ -30,8 +30,6 @@ import hidra.tan.services.ProductService;
 import hidra.tan.enums.ClientTransactionType;
 import hidra.tan.repositories.ClientStockRepository;
 
-import java.util.Map;
-
 @RestController
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 @RequestMapping("/api/v1/management")
