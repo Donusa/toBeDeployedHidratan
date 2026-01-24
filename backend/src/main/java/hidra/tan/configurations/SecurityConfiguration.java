@@ -33,7 +33,7 @@ public class SecurityConfiguration {
     @Autowired
     private LogoutHandler logoutHandler;
 
-    private static final String[] WHITE_LIST = { "/api/v1/auth/**", "/api/public/**" };
+    private static final String[] WHITE_LIST = { "/api/v1/auth/**" };
 
     /**
      * Configures the security filter chain.

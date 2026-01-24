@@ -113,21 +113,7 @@ export class PublicHealthInfoComponent implements OnInit {
   }
 
   private loadHealthData() {
-    // Try to get data from backend first
-    this.healthDataService.getPublicHealthData().subscribe({
-      next: (response) => {
-        if (response && response.data) {
-          this.healthData = response.data;
-          this.isLoading = false;
-        } else {
-          this.checkQueryParams();
-        }
-      },
-      error: (error) => {
-        console.error('Error fetching public health data:', error);
-        this.checkQueryParams();
-      }
-    });
+    this.checkQueryParams();
   }
 
   private checkQueryParams() {

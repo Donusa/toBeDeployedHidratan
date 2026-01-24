@@ -32,14 +32,8 @@ import hidra.tan.repositories.ClientStockRepository;
 
 import java.util.Map;
 
-import hidra.tan.entities.HealthData;
-import hidra.tan.services.HealthDataService;
-
-/**
- * Controller for managing application users.
- */
 @RestController
-@PreAuthorize("hasAuthority('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 @RequestMapping("/api/v1/management")
 public class ManagmentController {
 
@@ -57,8 +51,6 @@ public class ManagmentController {
     private ProductService productService;
     @Autowired
     private ClientTransactionService clientTransactionService;
-    @Autowired
-    private HealthDataService healthDataService;
     
     /**
      * Endpoint to list all users.
@@ -227,17 +219,4 @@ public class ManagmentController {
 	public ResponseEntity<?> getMatchingDeliveries(@RequestParam String email) {
 		return ResponseEntity.ok(deliveryService.getMatchingDeliveries(email));
 	}
-
-    @GetMapping("/health-data")
-    public ResponseEntity<?> getManagementHealthData() {
-        HealthData data = healthDataService.getHealthData();
-        return ResponseEntity.ok(data);
-    }
-
-    @PostMapping("/health-data")
-    public ResponseEntity<?> saveHealthData(@RequestBody Map<String, String> request) {
-        String data = request.get("data");
-        HealthData saved = healthDataService.saveHealthData(data);
-        return ResponseEntity.ok(saved);
-    }
 }

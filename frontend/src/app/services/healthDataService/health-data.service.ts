@@ -8,8 +8,7 @@ import { isPlatformBrowser } from '@angular/common';
   providedIn: 'root'
 })
 export class HealthDataService {
-  private apiUrl = `${environment.apiUrl}${environment.endpoints.management.base}${environment.endpoints.management.healthData}`;
-  private publicUrl = `${environment.apiUrl}${environment.endpoints.healthData.base}`;
+  private readonly STORAGE_KEY = 'health_data_info';
 
   constructor(private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) { }
 
@@ -28,33 +27,24 @@ export class HealthDataService {
   }
 
   getHealthData(): Observable<any> {
-    return this.http.get<any>(this.apiUrl, { 
-      headers: this.getHeaders() 
-    }).pipe(
-      catchError(error => {
-        console.error('Error fetching health data:', error);
-        return throwError(() => new Error('Error al obtener los datos de sanidad'));
-      })
-    );
+    if (isPlatformBrowser(this.platformId)) {
+      const data = localStorage.getItem(this.STORAGE_KEY) || '';
+      return of({ data });
+    }
+    return of({ data: '' });
   }
 
   saveHealthData(data: string): Observable<any> {
-    return this.http.post<any>(this.apiUrl, { data }, { 
-      headers: this.getHeaders() 
-    }).pipe(
-      catchError(error => {
-        console.error('Error saving health data:', error);
-        return throwError(() => new Error('Error al guardar los datos de sanidad'));
-      })
-    );
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(this.STORAGE_KEY, data);
+      return of({ success: true, data });
+    }
+    return of({ success: false });
   }
 
   getPublicHealthData(): Observable<any> {
-    return this.http.get<any>(this.publicUrl).pipe(
-      catchError(error => {
-        console.error('Error fetching public health data:', error);
-        return throwError(() => new Error('Error al obtener los datos públicos de sanidad'));
-      })
-    );
+    // Public data is now handled via URL params in the component
+    // but we can return empty here to satisfy interface if needed
+    return of({ data: '' });
   }
 }
