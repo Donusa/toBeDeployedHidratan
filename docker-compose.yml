@@ -29,6 +29,9 @@ services:
       retries: 10
 
   frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
     image: hidratan_frontend:prod
     ports:
       - "80:80"

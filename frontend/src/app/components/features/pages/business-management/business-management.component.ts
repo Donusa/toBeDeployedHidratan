@@ -38,6 +38,7 @@ export class BusinessManagementComponent {
   }
 
   openHealthDataDialog(): void {
+    // Force cache refresh by using a new service instance logic or simply trusting the service
     this.healthDataService.getHealthData().subscribe({
       next: (response: any) => {
         const savedData = response?.data || '';
@@ -45,8 +46,6 @@ export class BusinessManagementComponent {
       },
       error: (error: any) => {
         console.error('Error fetching health data:', error);
-        // If it's a 404, it might mean no data exists yet, so open with empty string
-        // Otherwise show error but still allow editing
         this.showDialog('');
       }
     });

@@ -25,9 +25,6 @@ export const environment = {
     clients: {
       base: '/delivery',
       clients : '/clients'
-    },
-    healthData: {
-      base: '/api/public/health-data'
     }
   }
 }; 
