@@ -8,7 +8,7 @@ import { isPlatformBrowser } from '@angular/common';
   providedIn: 'root'
 })
 export class HealthDataService {
-  private apiUrl = `${environment.apiUrl}${environment.endpoints.healthData.management}`;
+  private apiUrl = `${environment.apiUrl}${environment.endpoints.management.base}${environment.endpoints.management.healthData}`;
   private publicUrl = `${environment.apiUrl}${environment.endpoints.healthData.base}`;
 
   constructor(private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) { }

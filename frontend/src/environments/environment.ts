@@ -10,7 +10,8 @@ export const environment = {
     management: {
       base: '/api/v1/management',
         users: '/users',
-        disable: '/disable'
+        disable: '/disable',
+        healthData: '/health-data'
     },
     delivery: {
       base: '/delivery',
@@ -27,8 +28,7 @@ export const environment = {
       clients : '/clients'
     },
     healthData: {
-      base: '/api/public/health-data',
-      management: '/api/v1/management/health-data'
+      base: '/api/public/health-data'
     }
   }
 }; 
