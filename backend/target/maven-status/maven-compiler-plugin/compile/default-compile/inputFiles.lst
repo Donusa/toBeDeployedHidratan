@@ -41,6 +41,7 @@ D:\sistemas\toBeDeployedHidratan\backend\src\main\java\hidra\tan\requests\Passwo
 D:\sistemas\toBeDeployedHidratan\backend\src\main\java\hidra\tan\requests\ProductAdditionRequest.java
 D:\sistemas\toBeDeployedHidratan\backend\src\main\java\hidra\tan\requests\RegisterRequest.java
 D:\sistemas\toBeDeployedHidratan\backend\src\main\java\hidra\tan\requests\ResetPasswordRequest.java
+D:\sistemas\toBeDeployedHidratan\backend\src\main\java\hidra\tan\requests\VisitCompletionRequest.java
 D:\sistemas\toBeDeployedHidratan\backend\src\main\java\hidra\tan\responses\AppUserResponse.java
 D:\sistemas\toBeDeployedHidratan\backend\src\main\java\hidra\tan\responses\AuthenticationResponse.java
 D:\sistemas\toBeDeployedHidratan\backend\src\main\java\hidra\tan\responses\DeliveryDto.java

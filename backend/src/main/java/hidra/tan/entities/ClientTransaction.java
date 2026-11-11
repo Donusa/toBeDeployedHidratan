@@ -3,6 +3,8 @@ package hidra.tan.entities;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import hidra.tan.enums.ClientTransactionType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,4 +44,11 @@ public class ClientTransaction {
     private BigDecimal debtBefore;
 
     private BigDecimal debtAfter;
+
+    private String operationId;
+
+    private Long deliveryId;
+
+    @JsonIgnore
+    private Boolean hiddenFromHistory;
 }

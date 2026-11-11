@@ -1,6 +1,6 @@
 <h2 mat-dialog-title class="dialog-title">
   Detalles de la Visita
-  <button mat-icon-button class="dialog-close" (click)="onClose()" *ngIf="isMobile" aria-label="Cerrar">
+  <button mat-icon-button class="dialog-close" (click)="onClose()" [disabled]="isSaving" *ngIf="isMobile" aria-label="Cerrar">
     <mat-icon>close</mat-icon>
   </button>
 </h2>
@@ -48,9 +48,9 @@
       <div class="detail-header">
         <mat-icon>inventory_add</mat-icon>
         <h3>Productos a Entregar</h3>
-        <button mat-raised-button color="primary" 
-                (click)="addProduct('delivery')" 
-                [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+        <button mat-raised-button color="primary"
+                (click)="addProduct('delivery')"
+                [disabled]="isSaving || data.status === 'COMPLETED' || data.status === 'CANCELLED'">
           <mat-icon>add</mat-icon>
           Agregar Producto
         </button>
@@ -71,9 +71,9 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let item; let i = index">
-              <button mat-icon-button color="warn" 
-                      (click)="removeProduct(i, 'delivery')" 
-                      [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+              <button mat-icon-button color="warn"
+                      (click)="removeProduct(i, 'delivery')"
+                      [disabled]="isSaving || data.status === 'COMPLETED' || data.status === 'CANCELLED'">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -94,9 +94,9 @@
       <div class="detail-header">
         <mat-icon>inventory_2</mat-icon>
         <h3>Productos a Retirar</h3>
-        <button mat-raised-button color="accent" 
-                (click)="addProduct('return')" 
-                [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+        <button mat-raised-button color="accent"
+                (click)="addProduct('return')"
+                [disabled]="isSaving || data.status === 'COMPLETED' || data.status === 'CANCELLED'">
           <mat-icon>add</mat-icon>
           Agregar Retorno
         </button>
@@ -117,9 +117,9 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let item; let i = index">
-              <button mat-icon-button color="warn" 
-                      (click)="removeProduct(i, 'return')" 
-                      [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED'">
+              <button mat-icon-button color="warn"
+                      (click)="removeProduct(i, 'return')"
+                      [disabled]="isSaving || data.status === 'COMPLETED' || data.status === 'CANCELLED'">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -140,9 +140,9 @@
       <div class="detail-header">
         <mat-icon>payments</mat-icon>
         <h3>Pago</h3>
-        <button mat-raised-button color="accent" 
-                (click)="addPayment()" 
-                [disabled]="data.status === 'COMPLETED' || data.status === 'CANCELLED' || totalDebt === 0">
+        <button mat-raised-button color="accent"
+                (click)="addPayment()"
+                [disabled]="isSaving || data.status === 'COMPLETED' || data.status === 'CANCELLED' || totalDebt === 0">
           <mat-icon>add</mat-icon>
           Registrar Pago
         </button>
@@ -175,20 +175,20 @@
 <mat-dialog-actions align="end" class="dialog-actions">
   <div class="action-buttons">
     <button mat-stroked-button color="primary" (click)="onViewHistory()">Ver historial</button>
-    <button mat-raised-button color="warn" 
-            (click)="onCancel()" 
+    <button mat-raised-button color="warn"
+            (click)="onCancel()" [disabled]="isSaving"
             *ngIf="!offRoute && data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
       Cancelar Visita
     </button>
-    <button mat-raised-button color="accent" 
-            (click)="onEdit()" 
+    <button mat-raised-button color="accent"
+            (click)="onEdit()" [disabled]="isSaving"
             *ngIf="!offRoute && isAdmin && data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
       Editar
     </button>
-    <button mat-raised-button color="primary" 
-            (click)="onSave()" 
+    <button mat-raised-button color="primary"
+            (click)="onSave()" [disabled]="isSaving"
             *ngIf="data.status !== 'COMPLETED' && data.status !== 'CANCELLED'">
-      {{ offRoute ? 'Registrar' : 'Finalizar Visita' }}
+      {{ isSaving ? 'Guardando...' : (offRoute ? 'Registrar' : 'Finalizar Visita') }}
     </button>
   </div>
-</mat-dialog-actions> 
+</mat-dialog-actions>

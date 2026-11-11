@@ -1,0 +1,12 @@
+{
+  "^/local-api(/|$)": {
+    "target": "http://127.0.0.1:9000",
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/local-api": ""
+    },
+    "headers": {
+      "Origin": "http://hidratan.com.ar"
+    }
+  }
+}

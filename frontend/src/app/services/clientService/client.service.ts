@@ -74,6 +74,11 @@ export class ClientService {
     });
   }
 
+  deleteClientHistoryEntry(clientId: number, transactionId: number): Observable<void> {
+    const url = `${environment.apiUrl}${environment.endpoints.delivery.base}/clients/${clientId}/transactions/${transactionId}`;
+    return this.http.delete<void>(url, { headers: this.getHeaders() });
+  }
+
   addClientStock(clientId: number, productId: number, quantity: number): Observable<string> {
     const url = `${environment.apiUrl}${environment.endpoints.management.base}/clients/${clientId}/stock/add`;
     const params = new HttpParams()

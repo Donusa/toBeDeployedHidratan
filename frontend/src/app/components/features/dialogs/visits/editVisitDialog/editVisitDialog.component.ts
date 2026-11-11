@@ -83,13 +83,13 @@ export class EditVisitDialogComponent implements OnInit {
   ) {
     const [datePart, timePart] = data.date.split('T');
     const [day, month, year] = datePart.split('/');
-    const dateObj = new Date(`${year}-${month}-${day}`);
+    const dateObj = new Date(+year, +month - 1, +day);
 
     this.visitForm = this.formBuilder.group({
       clientId: [data.client.id, Validators.required],
       delivererId: [data.deliverer.email, Validators.required],
       date: [dateObj, Validators.required],
-      time: [timePart, [Validators.required, this.validateTime.bind(this)]]
+      time: [timePart, Validators.required]
     });
 
     this.clientSearchControl = new FormControl(data.client);
@@ -289,47 +289,4 @@ export class EditVisitDialogComponent implements OnInit {
     }
     return null;
   }
-
-  private validateTime(control: AbstractControl): ValidationErrors | null {
-    const time = control.value;
-    if (!time) return null;
-
-    const [hours, minutes] = time.split(':').map(Number);
-    const selectedDate = this.visitForm?.get('date')?.value;
-    
-    if (!selectedDate) return null;
-
-    const selectedDay = selectedDate.getDay();
-    const now = new Date();
-    const today = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate()
-    );
-
-    if (selectedDate.getTime() === today.getTime()) {
-      const currentHours = now.getHours();
-      const currentMinutes = now.getMinutes();
-
-      if (hours < currentHours || (hours === currentHours && minutes < currentMinutes)) {
-        return { invalidTime: true };
-      }
-    }
-
-    if (selectedDay === 6 || selectedDay === 0) {
-      return { invalidTime: true };
-    } else {
-      if (hours < 9 || (hours === 18 && minutes > 0) || hours > 18) {
-        return { invalidTime: true };
-      }
-    }
-
-    return null;
-  }
-
-  dateFilter = (date: Date | null): boolean => {
-    if (!date) return false;
-    const day = date.getDay();
-    return day !== 0 && day !== 6;
-  };
 }

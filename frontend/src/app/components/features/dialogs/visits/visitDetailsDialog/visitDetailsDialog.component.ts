@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { DeliveryViewResponse } from '../../../../../interfaces/DeliveryViewResponse.interface';
 import { AuthenticationService } from '../../../../../services/authentication.service';
 import { EditVisitDialogComponent } from '../editVisitDialog/editVisitDialog.component';
-import { VisitService } from '../../../../../services/visitService/visit.service';
+import { VisitService, VisitCompletion } from '../../../../../services/visitService/visit.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { ProductService } from '../../../../../services/productService/product.service';
@@ -18,8 +18,7 @@ import { DelivererService } from '../../../../../services/delivererService/deliv
 import { DelivererStock } from '../../../../../interfaces/delivererStock.interface';
 import { ClientService } from '../../../../../services/clientService/client.service';
 import { ClientStock } from '../../../../../interfaces/clientStock.interface';
-import { Observable, forkJoin, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { finalize } from 'rxjs/operators';
 import { ConfirmDialogComponent } from '../../../../shared/confirmDialog/confirmDialog.component';
 import { ClientTransactionsDialogComponent } from '../../clients/clientTransactionsDialog/clientTransactionsDialog.component';
 
@@ -49,6 +48,8 @@ export class VisitDetailsDialogComponent {
   totalDebt: number = 0;
   isMobile = false;
   offRoute = false;
+  isSaving = false;
+  private readonly operationId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
 
   constructor(
     public dialogRef: MatDialogRef<VisitDetailsDialogComponent>,
@@ -79,17 +80,17 @@ export class VisitDetailsDialogComponent {
 
   formatDate(dateString: string): string {
     if (!dateString) return 'N/A';
-    
+
     try {
       const [datePart, timePart] = dateString.split('T');
       const [day, month, year] = datePart.split('/');
       const date = new Date(+year, +month - 1, +day);
-      
+
       if (timePart) {
         const [hours, minutes] = timePart.split(':');
         date.setHours(+hours, +minutes);
       }
-      
+
       return this.datePipe.transform(date, 'dd/MM/yyyy HH:mm') || 'N/A';
     } catch (error) {
       console.error('Error formatting date:', error);
@@ -99,7 +100,7 @@ export class VisitDetailsDialogComponent {
 
   formatDateOnly(dateString: string): string {
     if (!dateString) return 'N/A';
-    
+
     try {
       const [datePart] = dateString.split('T');
       const [day, month, year] = datePart.split('/');
@@ -112,7 +113,7 @@ export class VisitDetailsDialogComponent {
 
   formatTimeOnly(dateString: string): string {
     if (!dateString) return 'N/A';
-    
+
     try {
       const [, timePart] = dateString.split('T');
       return timePart || 'N/A';
@@ -137,11 +138,12 @@ export class VisitDetailsDialogComponent {
   }
 
   onClose(): void {
+    if (this.isSaving) return;
     this.dialogRef.close();
   }
 
   onEdit(): void {
-    if (this.data.status === 'COMPLETED') return;
+    if (this.isSaving || this.data.status === 'COMPLETED' || this.data.status === 'CANCELLED') return;
     const dialogRef = this.dialog.open(EditVisitDialogComponent, {
       width: '500px',
       data: {
@@ -207,16 +209,17 @@ export class VisitDetailsDialogComponent {
     this.currentDebt = this.deliveryProducts.data.reduce((total, item) => {
       return total + (item.product.price * item.quantity);
     }, 0);
-    this.totalDebt = this.data.client.debt + this.currentDebt;
+    this.totalDebt = this.data.client.debt + this.currentDebt - this.currentPayment;
   }
 
   addProduct(type: 'delivery' | 'return'): void {
+    if (this.isSaving || this.data.status === 'COMPLETED' || this.data.status === 'CANCELLED') return;
     const dialogRef = this.dialog.open(AddProductToVisitDialogComponent, {
       width: '400px',
       data: {
         type,
-        availableProducts: type === 'delivery' ? 
-          this.availableDelivererProducts : 
+        availableProducts: type === 'delivery' ?
+          this.availableDelivererProducts :
           this.availableClientProducts.filter(p => p.product.returnable)
       }
     });
@@ -234,6 +237,7 @@ export class VisitDetailsDialogComponent {
   }
 
   removeProduct(index: number, type: 'delivery' | 'return'): void {
+    if (this.isSaving) return;
     if (type === 'delivery') {
       const newData = [...this.deliveryProducts.data];
       newData.splice(index, 1);
@@ -247,7 +251,7 @@ export class VisitDetailsDialogComponent {
   }
 
   addPayment(): void {
-    if (this.data.status === 'COMPLETED') return;
+    if (this.isSaving || this.data.status === 'COMPLETED' || this.data.status === 'CANCELLED') return;
     const dialogRef = this.dialog.open(AddPaymentDialogComponent, {
       width: '400px',
       data: {
@@ -257,119 +261,59 @@ export class VisitDetailsDialogComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.currentPayment = result.amount;
-        this.totalDebt -= result.amount;
+        this.currentPayment += Number(result.amount);
+        this.calculateDebt();
       }
     });
   }
 
   onSave(): void {
-    if (this.data.status === 'COMPLETED') return;
-    const tasks: Observable<any>[] = [];
+    if (this.isSaving || this.data.status === 'COMPLETED' || this.data.status === 'CANCELLED') return;
+    const movements: VisitCompletion = {
+      deliveries: this.deliveryProducts.data.map(item => ({
+        productId: item.product.id, quantity: item.quantity
+      })),
+      returns: this.returnProducts.data.map(item => ({
+        productId: item.product.id, quantity: item.quantity
+      })),
+      paymentAmount: this.currentPayment
+    };
 
-    this.deliveryProducts.data.forEach(item => {
-      tasks.push(
-        this.visitService.transferProduct(
-          this.data.delivererEmail,
-          this.data.client.id,
-          item.product.id,
-          item.quantity
-        )
-      );
-    });
-
-    this.returnProducts.data.forEach(item => {
-      tasks.push(
-        this.visitService.returnProduct(
-          this.data.client.id,
-          this.data.delivererEmail,
-          item.product.id,
-          item.quantity,
-          item.product.price * item.quantity
-        )
-      );
-    });
-
-    tasks.push(
-      this.visitService.processPayment(
-        this.data.client.id,
-        this.totalDebt
-      )
-    );
-
-    if (this.offRoute) {
-      forkJoin(tasks.length > 0 ? tasks : [of(null)]).subscribe({
-        next: () => {
-          this.snackBar.open('Reparto registrado exitosamente', 'Cerrar', {
-            duration: 3000
-          });
-          this.dialogRef.close(true);
-        },
-        error: () => {
-          this.snackBar.open('Error al registrar el reparto', 'Cerrar', {
-            duration: 3000
-          });
-        }
-      });
-    } else {
-      forkJoin(tasks.length > 0 ? tasks : [of(null)]).pipe(
-        switchMap(() => this.visitService.completeVisit(this.data.deliverId)),
-        switchMap(() => {
-          if (this.data.uniqueVisit) {
-            return of(null);
-          }
-          const nextVisitDate = this.calculateNextVisitDate(
-            this.data.deliveryDate,
-            this.data.client.frecuency
-          );
-
-          return this.visitService.createVisit({
-            clientId: this.data.client.id,
-            delivererEmail: this.data.delivererEmail,
-            date: nextVisitDate
-          });
+    this.isSaving = true;
+    this.dialogRef.disableClose = true;
+    const request = this.offRoute
+      ? this.visitService.registerOffRouteVisit({
+          ...movements,
+          clientId: this.data.client.id,
+          deliveryManEmail: this.data.delivererEmail,
+          operationId: this.operationId
         })
-      ).subscribe({
-        next: () => {
-          const message = this.data.uniqueVisit 
+      : this.visitService.completeVisit(this.data.deliverId, movements);
+
+    request.pipe(finalize(() => {
+      this.isSaving = false;
+      this.dialogRef.disableClose = false;
+    })).subscribe({
+      next: () => {
+        this.data.status = 'COMPLETED';
+        const message = this.offRoute ? 'Reparto registrado exitosamente'
+          : this.data.uniqueVisit || !this.data.client.frecuency
             ? 'Visita finalizada exitosamente'
             : 'Visita finalizada y reprogramada exitosamente';
-          this.snackBar.open(message, 'Cerrar', {
-            duration: 3000
-          });
-          this.dialogRef.close(true);
-        },
-        error: (error) => {
-          console.error('Error processing visit:', error);
-          this.snackBar.open('Error al procesar la visita', 'Cerrar', {
-            duration: 3000
-          });
-        }
-      });
-    }
-  }
-
-  private calculateNextVisitDate(currentDate: string, frecuency: number): string {
-    const [datePart, timePart] = currentDate.split('T');
-    const [day, month, year] = datePart.split('/');
-    
-    const date = new Date(+year, +month - 1, +day);
-    date.setDate(date.getDate() + frecuency);
-    
-    if (date.getDay() === 6) {
-      date.setDate(date.getDate() + 2);
-    } else if (date.getDay() === 0) {
-      date.setDate(date.getDate() + 1);
-    }
-    
-    const nextDay = String(date.getDate()).padStart(2, '0');
-    const nextMonth = String(date.getMonth() + 1).padStart(2, '0');
-    const nextYear = date.getFullYear();
-    
-    return `${nextDay}/${nextMonth}/${nextYear}T${timePart}`;
+        this.snackBar.open(message, 'Cerrar', { duration: 3000 });
+        this.dialogRef.close(true);
+      },
+      error: (error) => {
+        console.error('Error processing visit:', error);
+        this.snackBar.open('Error al procesar la visita. Puede volver a intentarlo.', 'Cerrar', {
+          duration: 3000
+        });
+      }
+    });
   }
 
   onCancel(): void {
+    if (this.isSaving) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -402,4 +346,4 @@ export class VisitDetailsDialogComponent {
       }
     });
   }
-} 
+}

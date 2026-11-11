@@ -46,7 +46,7 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Fecha</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="date" [matDatepickerFilter]="dateFilter">
+        <input matInput [matDatepicker]="picker" formControlName="date">
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
         <mat-error *ngIf="visitForm.get('date')?.hasError('required')">
@@ -60,25 +60,11 @@
         <mat-error *ngIf="visitForm.get('time')?.hasError('required')">
           La hora es requerida
         </mat-error>
-        <mat-error *ngIf="visitForm.get('time')?.hasError('invalidTime')">
-          Horario no válido. Lunes a Viernes: 9:00 - 18:00
-        </mat-error>
       </mat-form-field>
 
       <mat-checkbox formControlName="uniqueVisit" color="primary">
         Visita Única
       </mat-checkbox>
-    </div>
-
-    <div class="schedule-info">
-      <mat-icon>info</mat-icon>
-      <div class="schedule-text">
-        <strong>¡Horario de atención!</strong>
-        <ul>
-          <li>Lunes a Viernes: 9:00 a 18:00</li>
-          <li>No se realizan visitas los sábados ni domingos</li>
-        </ul>
-      </div>
     </div>
   </mat-dialog-content>
 
@@ -89,4 +75,4 @@
       Guardar
     </button>
   </mat-dialog-actions>
-</form> 
+</form>

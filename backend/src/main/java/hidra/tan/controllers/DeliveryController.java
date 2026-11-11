@@ -20,11 +20,12 @@ import hidra.tan.entities.Delivery;
 import hidra.tan.responses.DeliveryDto;
 import hidra.tan.responses.DeliveryViewResponse;
 import hidra.tan.services.AppClientService;
-import hidra.tan.services.AppUserService;
 import hidra.tan.services.DeliveryService;
 import hidra.tan.services.ClientTransactionService;
 import hidra.tan.responses.DeliveryReportDTO;
 import hidra.tan.requests.ClientTransactionRequest;
+import hidra.tan.requests.VisitCompletionRequest;
+import jakarta.validation.Valid;
 import hidra.tan.entities.Product;
 import hidra.tan.enums.ClientTransactionType;
 import hidra.tan.entities.ClientTransaction;
@@ -43,8 +44,6 @@ public class DeliveryController {
 	@Autowired
 	private AppClientService appClientService;
 
-	@Autowired
-    private AppUserService appUserService;
     @Autowired
     private ClientTransactionService clientTransactionService;
     @Autowired
@@ -141,13 +140,8 @@ public class DeliveryController {
 	public ResponseEntity<Delivery> updateDelivery(@PathVariable Long id, @RequestParam String assignedDeliverer,
 												   @RequestParam Long client,
 												   @RequestParam String deliveryDate) {
-		return deliveryService.findById(id).map(existingDelivery -> {
-			existingDelivery.setClient(appClientService.findById(client).orElseThrow(() -> new IllegalArgumentException("Client not found")));
-			existingDelivery.setDeliveryMan(appUserService.findByEmail(assignedDeliverer));
-			existingDelivery.setDeliveryDate(deliveryDate);
-			Delivery updatedDelivery = deliveryService.save(existingDelivery);
-			return ResponseEntity.ok(updatedDelivery);
-		}).orElse(ResponseEntity.notFound().build());
+		return deliveryService.updateDelivery(id, client, assignedDeliverer, deliveryDate)
+                .map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
 	}
 
 	@PostMapping("/create")
@@ -175,10 +169,18 @@ public class DeliveryController {
 	}
 
 	@PutMapping("/{id}/complete")
-	public ResponseEntity<Delivery> completeDelivery(@PathVariable Long id) {
-		Delivery updatedDelivery = deliveryService.completeDelivery(id);
+	public ResponseEntity<Delivery> completeDelivery(@PathVariable Long id,
+            @Valid @RequestBody(required = false) VisitCompletionRequest request) {
+		Delivery updatedDelivery = request == null ? deliveryService.completeDelivery(id)
+                : deliveryService.completeDelivery(id, request);
 		return ResponseEntity.ok(updatedDelivery);
 	}
+
+    @PostMapping("/off-route")
+    public ResponseEntity<Void> registerOffRouteVisit(@Valid @RequestBody VisitCompletionRequest request) {
+        deliveryService.registerOffRouteVisit(request);
+        return ResponseEntity.noContent().build();
+    }
 
 	/**
 	 * Endpoint to cancel a delivery.
@@ -188,11 +190,8 @@ public class DeliveryController {
 	 */
 	@PutMapping("/cancel/{id}")
 	public ResponseEntity<Delivery> cancelDelivery(@PathVariable Long id) {
-		return deliveryService.findById(id).map(existingDelivery -> {
-			existingDelivery.setStatus("CANCELLED");
-			Delivery updatedDelivery = deliveryService.save(existingDelivery);
-			return ResponseEntity.ok(updatedDelivery);
-		}).orElse(ResponseEntity.notFound().build());
+		return deliveryService.cancelDelivery(id).map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
 	}
 
 
@@ -205,6 +204,14 @@ public class DeliveryController {
     @GetMapping("/clients/{clientId}/transactions")
     public ResponseEntity<?> getClientTransactions(@PathVariable Long clientId) {
         return ResponseEntity.ok(clientTransactionService.getByClientId(clientId));
+    }
+
+    @DeleteMapping("/clients/{clientId}/transactions/{transactionId}")
+    public ResponseEntity<Void> deleteClientHistoryEntry(@PathVariable Long clientId, @PathVariable Long transactionId) {
+        if (!clientTransactionService.hideHistoryEntry(clientId, transactionId)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/clients/{clientId}/transactions")
@@ -229,6 +236,9 @@ public class DeliveryController {
                 appClientService.save(client);
             }
             ClientTransaction tx = clientTransactionService.recordMonetary(client, request.getAmount(), before, after, request.getType());
+            if (tx == null) {
+                return ResponseEntity.noContent().build();
+            }
             return ResponseEntity.ok(tx);
         } else {
             return ResponseEntity.badRequest().body("Tipo de transacción inválido");

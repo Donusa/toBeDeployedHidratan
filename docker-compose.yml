@@ -1,6 +1,7 @@
 services:
   backend:
     build: ./backend
+    restart: unless-stopped
     expose:
       - "9000"
     environment:

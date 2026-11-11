@@ -2,20 +2,32 @@
 
 <mat-dialog-content>
   <mat-accordion>
-    <mat-expansion-panel *ngFor="let tx of transactions">
+    <mat-expansion-panel *ngFor="let group of transactionGroups">
       <mat-expansion-panel-header>
-        <mat-panel-title>{{tx.date | date:'dd/MM/yyyy HH:mm'}}</mat-panel-title>
-        <mat-panel-description>{{formatType(tx.type)}}</mat-panel-description>
+        <mat-panel-title>{{group.date | date:'dd/MM/yyyy HH:mm'}}</mat-panel-title>
+        <mat-panel-description>{{formatGroup(group)}}</mat-panel-description>
       </mat-expansion-panel-header>
-      <div class="details-grid">
-        <div class="detail-item"><div class="label">Producto</div><div class="value">{{tx.product?.name || '-'}} </div></div>
-        <div class="detail-item"><div class="label">Cantidad</div><div class="value">{{tx.quantity || 0}}</div></div>
-        <div class="detail-item"><div class="label">Monto</div><div class="value">{{tx.amount | currency:'ARS':'symbol-narrow'}}</div></div>
-        <div class="detail-item"><div class="label">Deuda antes</div><div class="value">{{tx.debtBefore | currency:'ARS':'symbol-narrow'}}</div></div>
-        <div class="detail-item"><div class="label">Deuda después</div><div class="value">{{tx.debtAfter | currency:'ARS':'symbol-narrow'}}</div></div>
-      </div>
+      <section class="transaction-event" *ngFor="let tx of group.events">
+        <h3 class="event-title" *ngIf="group.isVisit">{{formatType(tx)}}</h3>
+        <div class="details-grid">
+          <ng-container *ngIf="tx.product">
+            <div class="detail-item"><div class="label">Producto</div><div class="value">{{tx.product.name}}</div></div>
+            <div class="detail-item"><div class="label">Cantidad</div><div class="value">{{tx.quantity || 0}}</div></div>
+          </ng-container>
+          <div class="detail-item" *ngIf="tx.amount !== null"><div class="label">Monto</div><div class="value">{{displayAmount(tx) | currency:'ARS':'symbol-narrow'}}</div></div>
+          <div class="detail-item"><div class="label">Deuda antes</div><div class="value">{{tx.debtBefore | currency:'ARS':'symbol-narrow'}}</div></div>
+          <div class="detail-item"><div class="label">Deuda después</div><div class="value">{{tx.debtAfter | currency:'ARS':'symbol-narrow'}}</div></div>
+        </div>
+      </section>
+      <mat-action-row *ngIf="isAdmin && group.events[0].id != null">
+        <button mat-button color="warn" type="button" [disabled]="isDeleting" (click)="deleteHistoryEntry(group)">
+          <mat-icon>delete</mat-icon>
+          Eliminar del historial
+        </button>
+      </mat-action-row>
     </mat-expansion-panel>
   </mat-accordion>
+  <p *ngIf="transactionGroups.length === 0">No hay movimientos registrados.</p>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

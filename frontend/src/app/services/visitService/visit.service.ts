@@ -10,6 +10,12 @@ import { isPlatformBrowser } from '@angular/common';
 import { ClientService } from '../clientService/client.service';
 import { DeliveryReport } from '../../interfaces/DeliveryReport.interface';
 
+export interface VisitCompletion {
+  deliveries: { productId: number; quantity: number }[];
+  returns: { productId: number; quantity: number }[];
+  paymentAmount: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -50,14 +56,14 @@ export class VisitService {
         if (!isAdmin) {
           return visits.filter(visit => {
             const isDelivererVisit = visit.delivererEmail === this.authService.getCurrentEmail();
-            
+
             if (!visit.deliveryDate) return false;
             try {
               const [datePart] = visit.deliveryDate.split('T');
               const [day, month, year] = datePart.split('/');
               const visitDate = new Date(+year, +month - 1, +day);
               visitDate.setHours(0, 0, 0, 0);
-              
+
               return isDelivererVisit && visitDate.getTime() === today.getTime();
             } catch (error) {
               return false;
@@ -116,9 +122,9 @@ export class VisitService {
     return this.http.put(
       `${this.apiUrl}/update/${id}`,
       null,
-      { 
+      {
         headers: this.getHeaders(),
-        params: params 
+        params: params
       }
     ).pipe(
       map(response => response),
@@ -145,7 +151,7 @@ export class VisitService {
     const params = new HttpParams()
       .set('clientId', clientId.toString())
       .set('newDebt', newDebt.toString());
-      
+
     return this.http.post(
       `${this.apiUrl}/pay`,
       null,
@@ -235,14 +241,14 @@ export class VisitService {
     );
   }
 
-  completeVisit(id: number): Observable<any> {
+  completeVisit(id: number, movements?: VisitCompletion): Observable<any> {
     if (!id) {
       return throwError(() => new Error('ID de visita no válido'));
     }
 
     return this.http.put(
       `${this.apiUrl}/${id}/complete`,
-      null,
+      movements ?? { deliveries: [], returns: [], paymentAmount: 0 },
       {
         headers: this.getHeaders()
       }
@@ -252,6 +258,14 @@ export class VisitService {
         return throwError(() => new Error('Error al completar la visita'));
       })
     );
+  }
+
+  registerOffRouteVisit(visit: VisitCompletion & {
+    clientId: number; deliveryManEmail: string; operationId: string;
+  }): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/off-route`, visit, {
+      headers: this.getHeaders()
+    });
   }
 
   cancelVisit(id: number): Observable<any> {
@@ -301,4 +315,4 @@ export class VisitService {
   }
 
 
-} 
+}

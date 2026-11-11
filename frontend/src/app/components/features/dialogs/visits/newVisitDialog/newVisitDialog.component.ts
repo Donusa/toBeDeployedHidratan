@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -86,7 +86,7 @@ export class NewVisitDialogComponent implements OnInit {
       clientId: ['', Validators.required],
       delivererId: ['', Validators.required],
       date: [new Date(), [Validators.required]],
-      time: [this.getCurrentTime(), [Validators.required, this.validateTime.bind(this)]],
+      time: [this.getCurrentTime(), Validators.required],
       uniqueVisit: [false]
     });
 
@@ -262,17 +262,6 @@ export class NewVisitDialogComponent implements OnInit {
     trigger.openPanel();
   }
 
-  dateFilter = (date: Date | null): boolean => {
-    if (!date) return false;
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-  
-    const day = date.getDay();
-    return day !== 0 && day !== 6 && date >= today;
-  }
-
   onClientSearchClick(trigger: MatAutocompleteTrigger): void {
     trigger.openPanel();
     
@@ -289,41 +278,4 @@ export class NewVisitDialogComponent implements OnInit {
     }
     return null;
   }
-
-  private validateTime(control: AbstractControl): ValidationErrors | null {
-    const time = control.value;
-    if (!time) return null;
-
-    const [hours, minutes] = time.split(':').map(Number);
-    const selectedDate = this.visitForm?.get('date')?.value;
-    if (!selectedDate) return null;
-
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const selectedDateOnly = new Date(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate()
-    );
-
-    if (selectedDateOnly.getTime() === today.getTime()) {
-      const currentHours = now.getHours();
-      const currentMinutes = now.getMinutes();
-
-      if (hours < currentHours || (hours === currentHours && minutes < currentMinutes)) {
-        return { invalidTime: true };
-      }
-    }
-
-    const selectedDay = selectedDateOnly.getDay();
-    if (selectedDay === 6 || selectedDay === 0) {
-      return { invalidTime: true };
-    } else {
-      if (hours < 9 || (hours === 18 && minutes > 0) || hours > 18) {
-        return { invalidTime: true };
-      }
-    }
-
-    return null;
-  }
-} 
+}
