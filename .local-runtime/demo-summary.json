@@ -1,0 +1,93 @@
+{
+  "LoginThroughFrontend": "OK",
+  "Database": "127.0.0.1:3306/hidratan_pruebas",
+  "User": "admin.pruebas@hidratan.local",
+  "Stock": [
+    {
+      "Product": "Bidon 20L [PRUEBA]",
+      "Quantity": 30
+    },
+    {
+      "Product": "Bidon 12L [PRUEBA]",
+      "Quantity": 20
+    },
+    {
+      "Product": "Pack agua [PRUEBA]",
+      "Quantity": 15
+    }
+  ],
+  "PendingVisits": [
+    {
+      "VisitId": 1,
+      "Address": "PRUEBA - San Martin 100",
+      "Date": "04/11/2026T10:00",
+      "Status": "PENDING",
+      "Unique": false,
+      "Debt": 6000.0,
+      "ForCollection": [
+        {
+          "Product": "Bidon 20L [PRUEBA]",
+          "Quantity": 5
+        },
+        {
+          "Product": "Bidon 12L [PRUEBA]",
+          "Quantity": 3
+        }
+      ]
+    },
+    {
+      "VisitId": 2,
+      "Address": "PRUEBA - Belgrano 220",
+      "Date": "04/11/2026T11:00",
+      "Status": "PENDING",
+      "Unique": false,
+      "Debt": 3000.0,
+      "ForCollection": [
+        {
+          "Product": "Bidon 20L [PRUEBA]",
+          "Quantity": 4
+        },
+        {
+          "Product": "Bidon 12L [PRUEBA]",
+          "Quantity": 2
+        }
+      ]
+    },
+    {
+      "VisitId": 3,
+      "Address": "PRUEBA - Mitre 350",
+      "Date": "04/11/2026T12:00",
+      "Status": "PENDING",
+      "Unique": false,
+      "Debt": 0.0,
+      "ForCollection": [
+        {
+          "Product": "Bidon 20L [PRUEBA]",
+          "Quantity": 3
+        },
+        {
+          "Product": "Bidon 12L [PRUEBA]",
+          "Quantity": 3
+        }
+      ]
+    },
+    {
+      "VisitId": 4,
+      "Address": "PRUEBA - Sarmiento 480",
+      "Date": "04/11/2026T13:00",
+      "Status": "PENDING",
+      "Unique": true,
+      "Debt": 4500.0,
+      "ForCollection": [
+        {
+          "Product": "Bidon 20L [PRUEBA]",
+          "Quantity": 5
+        },
+        {
+          "Product": "Bidon 12L [PRUEBA]",
+          "Quantity": 2
+        }
+      ]
+    }
+  ]
+}
