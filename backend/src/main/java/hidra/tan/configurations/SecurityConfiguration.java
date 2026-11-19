@@ -16,6 +16,10 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.core.Ordered;
 
 import hidra.tan.enums.Roles;
 import hidra.tan.logging.Log4jImpl;
@@ -72,6 +76,32 @@ public class SecurityConfiguration {
                         .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()));
         logger.logInfo("SecurityFilterChain configured successfully.");
         return http.build();
+    }
+
+    @Bean
+    FilterRegistrationBean<Filter> dispatcherDebugFilter() {
+        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
+
+        registration.setFilter((request, response, chain) -> {
+            HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+            logger.logInfo(
+                "DISPATCH DEBUG - Type: " + httpRequest.getDispatcherType()
+                + " | URI: " + httpRequest.getRequestURI()
+                + " | Original URI: " + httpRequest.getAttribute("jakarta.servlet.error.request_uri")
+            );
+
+            chain.doFilter(request, response);
+        });
+
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        registration.setDispatcherTypes(
+            DispatcherType.REQUEST,
+            DispatcherType.ERROR,
+            DispatcherType.FORWARD
+        );
+
+        return registration;
     }
 
     /**
