@@ -16,7 +16,6 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import jakarta.servlet.DispatcherType;
 
 import hidra.tan.enums.Roles;
 import hidra.tan.logging.Log4jImpl;
@@ -52,11 +51,11 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> {
                     logger.logInfo("Configuring access rules...");
-                    auth.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                            .requestMatchers(WHITE_LIST).permitAll()
-                            .requestMatchers(HttpMethod.DELETE, "/delivery/clients/{clientId}/transactions/{transactionId}")
-                            .hasAuthority(Roles.ROLE_ADMIN.name())
-                            .anyRequest().authenticated();
+                    auth.requestMatchers("/error").permitAll()
+                        .requestMatchers(WHITE_LIST).permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/delivery/clients/{clientId}/transactions/{transactionId}")
+                        .hasAuthority(Roles.ROLE_ADMIN.name())
+                        .anyRequest().authenticated();
                 })
                 .sessionManagement(management -> {
                     logger.logInfo("Configuring session management...");
