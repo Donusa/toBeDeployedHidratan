@@ -1,4 +1,8 @@
 hidra\tan\services\VisitCompletionTransactionTest$Snapshot.class
 hidra\tan\services\VisitCompletionTransactionTest.class
+hidra\tan\HidratanApplicationTests.class
+hidra\tan\services\ClientTransactionServiceTest.class
+hidra\tan\services\VisitCompletionServiceTest.class
 hidra\tan\services\VisitCompletionTransactionTest$Fixture.class
 hidra\tan\controllers\ClientHistoryDeletionTest.class
+hidra\tan\services\DeliveryServiceTest.class
