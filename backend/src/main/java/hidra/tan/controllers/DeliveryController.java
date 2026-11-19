@@ -178,7 +178,9 @@ public class DeliveryController {
 
     @PostMapping("/off-route")
     public ResponseEntity<Void> registerOffRouteVisit(@Valid @RequestBody VisitCompletionRequest request) {
+		System.out.println("ENTRANDO A registerOffRouteVisit");
         deliveryService.registerOffRouteVisit(request);
+		System.out.println("FINALIZANDO registerOffRouteVisit");
         return ResponseEntity.noContent().build();
     }
 
