@@ -85,10 +85,15 @@ public class SecurityConfiguration {
         registration.setFilter((request, response, chain) -> {
             HttpServletRequest httpRequest = (HttpServletRequest) request;
 
-            logger.logInfo(
-                "DISPATCH DEBUG - Type: " + httpRequest.getDispatcherType()
+            System.out.println(
+                "DISPATCH DEBUG"
+                + " | Type: " + httpRequest.getDispatcherType()
+                + " | Method: " + httpRequest.getMethod()
                 + " | URI: " + httpRequest.getRequestURI()
-                + " | Original URI: " + httpRequest.getAttribute("jakarta.servlet.error.request_uri")
+                + " | Error URI: " + httpRequest.getAttribute("jakarta.servlet.error.request_uri")
+                + " | Error status: " + httpRequest.getAttribute("jakarta.servlet.error.status_code")
+                + " | Error message: " + httpRequest.getAttribute("jakarta.servlet.error.message")
+                + " | Error exception: " + httpRequest.getAttribute("jakarta.servlet.error.exception")
             );
 
             chain.doFilter(request, response);
